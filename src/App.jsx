@@ -9,6 +9,7 @@ import Register from "./pages/Register";
 import Cart from "./pages/Cart";
 import Contact from "./pages/Contact";
 import AdminRegister from "./admin/pages/register"
+import AdminLogin from "./admin/pages/login"
 import { CartProvider } from "./context/CartContext";
 
 function Layout() {
@@ -17,7 +18,7 @@ function Layout() {
   const hideHeader =
     location.pathname.startsWith("/admin") ||
     location.pathname === "/Login" ||
-    location.pathname === "/Register";
+    location.pathname === "/register";
 
   return (
     <>
@@ -34,6 +35,7 @@ function Layout() {
 
         {/* admin */}
         <Route path="/admin/register" element={<AdminRegister />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
       </Routes>
 
       {!hideHeader && <Footer />}
