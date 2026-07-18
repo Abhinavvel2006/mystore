@@ -1,0 +1,6 @@
+.dashboard-container{
+    min-height: 320px;
+    display: flex;
+    padding: 48px 20px;
+    background: #f3f5f9;
+}

@@ -85,18 +85,3 @@
 .admin-login-btn:hover {
     background: #1d1d5c;
 }
-
-.admin-login-footer {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    margin-top: 16px;
-    color: #4b5563;
-    font-size: 14px;
-}
-
-.admin-login-footer a {
-    color: #111827;
-    text-decoration: none;
-    font-weight: 700;
-}

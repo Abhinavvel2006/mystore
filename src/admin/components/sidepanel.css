@@ -1,0 +1,19 @@
+.sidepanel-container{
+    background-color: rgb(6, 6, 105);
+    width: 180px;
+    height: 636px;
+}
+.sidepanel-header{
+    border-bottom: 1px solid #6e6d6d;
+    padding: 20px;
+    color: #fff;
+}
+.sidepanel-header h6{
+    color: #1347f1;
+    font-family: 'Times New Roman', Times, serif;
+    gap: 2px;
+}
+.sidepanel-navigation{
+    align-items: center;
+    padding: 20px;
+}

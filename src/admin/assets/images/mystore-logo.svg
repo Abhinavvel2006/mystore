@@ -1,0 +1,14 @@
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Shopping bag icon -->
+  <g transform="translate(10, 10)">
+    <path d="M8 10h24v26c0 2.21-1.79 4-4 4H12c-2.21 0-4-1.79-4-4V10z" fill="#2563eb"/>
+    <path d="M14 10V8c0-2.21 1.79-4 4-4h4c2.21 0 4 1.79 4 4v2" stroke="#2563eb" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle cx="16" cy="20" r="1.5" fill="white"/>
+    <circle cx="24" cy="20" r="1.5" fill="white"/>
+  </g>
+
+  <!-- Text: mystore -->
+  <text x="55" y="35" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#1e293b" letter-spacing="-0.5">
+    my<tspan fill="#2563eb">store</tspan>
+  </text>
+</svg>

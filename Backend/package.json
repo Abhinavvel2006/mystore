@@ -12,6 +12,10 @@
   "type": "commonjs",
   "dependencies": {
     "cors": "^2.8.6",
-    "express": "^5.2.1"
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "install": "^0.13.0",
+    "mongoose": "^9.7.4",
+    "npm": "^12.0.1"
   }
 }
