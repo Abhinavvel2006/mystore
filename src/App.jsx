@@ -37,7 +37,7 @@ function App() {
           <Route path="/register" element={<Register />} />
 
           {/* Admin Login */}
-          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/" element={<AdminLogin />} />
 
           {/* Admin */}
           <Route path="/admin" element={<AdminLayout />}>

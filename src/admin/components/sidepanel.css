@@ -1,19 +1,71 @@
-.sidepanel-container{
-    background-color: rgb(6, 6, 105);
-    width: 180px;
-    height: 636px;
+.sidepanel-container {
+    width: 200px;
+    min-height: 100vh;
+    background-color: #0b1f3a;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    display: fixed;
 }
-.sidepanel-header{
-    border-bottom: 1px solid #6e6d6d;
-    padding: 20px;
-    color: #fff;
+
+.sidepanel-header {
+    border-bottom: 1px solid #23406b;
+    text-align: center;
 }
-.sidepanel-header h6{
-    color: #1347f1;
-    font-family: 'Times New Roman', Times, serif;
-    gap: 2px;
+
+.sidepanel-header img {
+    width: 80px;
+    height: 80px;
 }
-.sidepanel-navigation{
-    align-items: center;
-    padding: 20px;
+
+.sidepanel-header h6 {
+    margin: 0;
+    color: #6fa8ff;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.sidepanel-navigation {
+    padding: 12px;
+}
+
+.sidepanel-lists {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidepanel-lists li {
+    margin-bottom: 4px;
+}
+
+.sidepanel-lists h6 {
+    margin: 14px 0 6px;
+    color: #9fb3d1;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+.sidepanel-lists a {
+    display: block;
+    padding: 8px 10px;
+    color: #f2f2f2;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.sidepanel-lists a:hover,
+.sidepanel-lists a.active {
+    background-color: #1f4fb3;
+    border-radius: 4px;
+}
+
+.sidepanel-logout {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid #23406b;
+}
+
+.sidepanel-logout a {
+    color: #ffb3b3;
 }

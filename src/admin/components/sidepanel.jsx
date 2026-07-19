@@ -7,7 +7,7 @@ function Sidepanel(){
     return(
         <div className="sidepanel-container">
             <div className="sidepanel-header">
-                <img src="{Logo}" alt="logo"></img>
+                <img src={Logo} alt="logo" />
                 <h6>ADMIN PANEL</h6>
             </div>
             <div className="sidepanel-navigation">
@@ -39,7 +39,7 @@ function Sidepanel(){
                         <li>
                             <NavLink to="/admin/Settings">Settings</NavLink>
                         </li>
-                        <li>
+                        <li className="sidepanel-logout">
                             <NavLink to="/admin/logut">Logout</NavLink>
                         </li>
                     </ul>
