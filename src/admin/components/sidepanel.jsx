@@ -26,15 +26,9 @@ function Sidepanel(){
                         <li>
                             <NavLink to="/admin/Orders">Orders</NavLink>
                         </li>
-                        <li>
-                            <NavLink to="/admin/deliveryuser">Users</NavLink>
-                        </li>
                         <h6>SETTINGS</h6>
                         <li>
                             <NavLink to="/admin/Payment">Payment</NavLink>
-                        </li>
-                        <li>
-                            <NavLink to="/admin/Report">Report</NavLink>
                         </li>
                         <li>
                             <NavLink to="/admin/Settings">Settings</NavLink>

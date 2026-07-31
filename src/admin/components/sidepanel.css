@@ -1,18 +1,28 @@
 .sidepanel-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
     width: 200px;
-    min-height: 100vh;
+    min-width: 200px;
     background-color: #0b1f3a;
     color: #ffffff;
     font-family: Arial, sans-serif;
-    display: fixed;
+    display: flex;
+    flex-direction: column;
+    z-index: 1001;
+    overflow-y: auto;
 }
 
 .sidepanel-header {
+    padding: 16px 12px 12px;
     border-bottom: 1px solid #23406b;
     text-align: center;
 }
 
 .sidepanel-header img {
+    display: block;
+    margin: 0 auto;
     width: 80px;
     height: 80px;
 }
@@ -26,7 +36,9 @@
 }
 
 .sidepanel-navigation {
+    flex: 1;
     padding: 12px;
+    overflow-y: auto;
 }
 
 .sidepanel-lists {
@@ -61,7 +73,7 @@
 }
 
 .sidepanel-logout {
-    margin-top: 12px;
+    margin-top: auto;
     padding-top: 10px;
     border-top: 1px solid #23406b;
 }

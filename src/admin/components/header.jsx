@@ -1,19 +1,15 @@
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {faBars,faBell,faChevronDown} from "@fortawesome/free-solid-svg-icons";
+import { faBars, faBell, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import "./header.css";
 
-function AdminHeader({ isMenuOpen, onToggleMenu }) {
+function AdminHeader() {
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
     return (
         <div className="adminheader-container">
             <div className="adminheader-left">
-                <button
-                    className="menu-toggle"
-                    aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-                    onClick={onToggleMenu}
-                >
+                <button className="admin-menu-toggle" aria-label="Menu">
                     <FontAwesomeIcon icon={faBars} />
                 </button>
             </div>
