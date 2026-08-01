@@ -120,6 +120,11 @@
     background: #1d4ed8;
 }
 
+.action-grid a {
+    text-decoration: none;
+    color: white;
+}
+
 .manage-order {
     margin-top: 12px;
     display: flex;

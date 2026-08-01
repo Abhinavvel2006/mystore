@@ -63,6 +63,10 @@ export function CartProvider({ children}){
         setCart(currentCart => currentCart.filter(item => item.id !== productId));
     }
 
+    function clearCart() {
+        setCart([]);
+    }
+
     return(
         <CartContext.Provider 
             value={{
@@ -70,7 +74,8 @@ export function CartProvider({ children}){
                 addToCart,
                 increaseQuantity,
                 decreaseQuantity,
-                remove
+                remove,
+                clearCart
             }}
             >
 

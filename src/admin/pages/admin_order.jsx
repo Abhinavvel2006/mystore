@@ -56,29 +56,34 @@ function AdminOrder() {
             </div>
 
             <div className="admin-order-list">
-                {orders.map((order) => (
-                    <div key={order.id} className="admin-order-item">
-                        <div className="admin-order-main">
-                            <div>
-                                <h4>{order.id}</h4>
-                                <p>{order.customer}</p>
-                            </div>
-                            <div className="admin-order-meta">
-                                <span>{order.items}</span>
-                                <strong>{order.total}</strong>
-                            </div>
-                        </div>
+                {orders.map((order) => {
+                    const orderId = order._id || order.id;
+                    const statusClass = (order.status || "Pending").toLowerCase();
 
-                        <div className="admin-order-actions">
-                            <span className={`admin-order-status ${order.status.toLowerCase()}`}>
-                                {order.status}
-                            </span>
-                            <button type="button" onClick={() => updateStatus(order.id, "Pending")}>Pending</button>
-                            <button type="button" onClick={() => updateStatus(order.id, "Packed")}>Packed</button>
-                            <button type="button" onClick={() => updateStatus(order.id, "Delivered")}>Delivered</button>
+                    return (
+                        <div key={orderId} className="admin-order-item">
+                            <div className="admin-order-main">
+                                <div>
+                                    <h4>Order #{String(orderId).slice(-6).toUpperCase()}</h4>
+                                    <p>{order.customer || order.userEmail || "Guest"}</p>
+                                </div>
+                                <div className="admin-order-meta">
+                                    <span>{Array.isArray(order.items) ? `${order.items.length} item(s)` : "No items"}</span>
+                                    <strong>${Number(order.total || 0).toFixed(2)}</strong>
+                                </div>
+                            </div>
+
+                            <div className="admin-order-actions">
+                                <span className={`admin-order-status ${statusClass}`}>
+                                    {order.status || "Pending"}
+                                </span>
+                                <button type="button" onClick={() => updateStatus(orderId, "Pending")}>Pending</button>
+                                <button type="button" onClick={() => updateStatus(orderId, "Packed")}>Packed</button>
+                                <button type="button" onClick={() => updateStatus(orderId, "Delivered")}>Delivered</button>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );

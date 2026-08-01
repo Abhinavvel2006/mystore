@@ -33,6 +33,8 @@ function Register() {
         const data = await response.json();
 
         if (data.success) {
+            const registeredUser = data.user?.email || email;
+            localStorage.setItem("currentUser", JSON.stringify({ email: registeredUser }));
             alert(data.message);
             navigate("/login");
         } else {

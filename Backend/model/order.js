@@ -1,14 +1,15 @@
 const mongoose = require('mongoose');
 
 const OrderItemSchema = new mongoose.Schema({
-  productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+  productId: { type: String, default: '' },
   name: String,
   qty: Number,
   price: Number,
 });
 
 const OrderSchema = new mongoose.Schema({
-  customer: { type: String },
+  customer: { type: String, default: 'Guest' },
+  userEmail: { type: String, default: '' },
   items: [OrderItemSchema],
   total: { type: Number, default: 0 },
   status: { type: String, default: 'Pending' },

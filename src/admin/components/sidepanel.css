@@ -78,6 +78,24 @@
     border-top: 1px solid #23406b;
 }
 
-.sidepanel-logout a {
+.sidepanel-logout a,
+.sidepanel-logout-btn {
     color: #ffb3b3;
+}
+
+.sidepanel-logout-btn {
+    display: block;
+    width: 100%;
+    padding: 8px 10px;
+    background: none;
+    border: none;
+    text-align: left;
+    font-size: 0.95rem;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.sidepanel-logout-btn:hover {
+    background-color: #1f4fb3;
+    color: #fff;
 }

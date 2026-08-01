@@ -12,7 +12,11 @@ const Order = require("./model/order");
 const app = express();
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({
+    extended: true,
+    limit: "50mb"
+}));
 
 mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("MongoDB Connected"))
@@ -49,6 +53,7 @@ app.post("/api/register", async (req, res) => {
     res.json({
       success: true,
       message: "Registration successful",
+      user: { email: newUser.email },
     });
   }
   catch(error){
@@ -81,6 +86,7 @@ app.post("/api/login", async (req, res) => {
   res.json({
     success: true,
     message: "Login Successful",
+    user: { email: user.email },
   });
 }
 catch(error){
@@ -213,14 +219,41 @@ app.get('/api/orders', async (req, res) => {
   }
 });
 
-app.post('/api/orders', async (req, res) => {
+app.get('/api/orders/user/:email', async (req, res) => {
   try {
-    const o = new Order(req.body);
-    await o.save();
-    res.json({ success: true, order: o });
+    const email = decodeURIComponent(req.params.email);
+    const orders = await Order.find({
+      $or: [{ userEmail: email }, { customer: email }]
+    }).sort({ createdAt: -1 });
+    res.json(orders);
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
+});
+
+app.post("/api/orders", async (req, res) => {
+    try {
+
+        console.log("Incoming Order:");
+        console.log(req.body);
+
+        const o = new Order(req.body);
+
+        await o.save();
+
+        res.json({
+            success: true,
+            order: o
+        });
+
+    } catch (err) {
+        console.log(err);
+
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+    }
 });
 
 app.put('/api/orders/:id', async (req, res) => {

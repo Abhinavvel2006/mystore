@@ -1,10 +1,17 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faBell, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import "./header.css";
 
 function AdminHeader() {
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        localStorage.removeItem("admin");
+        navigate("/admin", { replace: true });
+    };
 
     return (
         <div className="adminheader-container">
@@ -15,7 +22,7 @@ function AdminHeader() {
             </div>
 
             <div className="adminheader-right">
-                <button className="header-icon-btn" aria-label="Notifications">
+                <button className="header-icon-btn" aria-label="Notifications" onClick={() => navigate("/admin/notifications")}>
                     <FontAwesomeIcon icon={faBell} />
                 </button>
 
@@ -39,10 +46,7 @@ function AdminHeader() {
 
                     {isProfileMenuOpen && (
                         <div className="admin-profile-menu" role="menu">
-                            <button className="profile-menu-item" role="menuitem">
-                                <span>Switch role</span>
-                            </button>
-                            <button className="profile-menu-item logout" role="menuitem">
+                            <button className="profile-menu-item logout" role="menuitem" onClick={handleLogout}>
                                 <span>Log out</span>
                             </button>
                         </div>

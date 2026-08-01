@@ -1,9 +1,16 @@
 import { useState } from "react";
 import Logo from "../assets/images/mystore-logo.svg";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import "./sidepanel.css";
 
 function Sidepanel(){
+const navigate = useNavigate();
+
+    const handleLogout = () => {
+        localStorage.removeItem("admin");
+        navigate("/admin", { replace: true });
+    };
+
     return(
         <div className="sidepanel-container">
             <div className="sidepanel-header">
@@ -34,7 +41,9 @@ function Sidepanel(){
                             <NavLink to="/admin/Settings">Settings</NavLink>
                         </li>
                         <li className="sidepanel-logout">
-                            <NavLink to="/admin/logut">Logout</NavLink>
+                            <button type="button" className="sidepanel-logout-btn" onClick={handleLogout}>
+                                Logout
+                            </button>
                         </li>
                     </ul>
                 </nav>

@@ -1,7 +1,9 @@
 import { NavLink } from "react-router-dom";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./dashboard.css";
 import "./admin_product.css";
+
+const API_BASE = "http://localhost:5000/api";
 
 function ManageOrder({ orders }) {
     if (!orders || orders.length === 0) {
@@ -38,6 +40,19 @@ function Dashboard() {
     const [editingId, setEditingId] = useState(null);
     const manageProductsRef = useRef(null);
 
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const res = await fetch(`${API_BASE}/products`);
+                const data = await res.json();
+                setProducts(data || []);
+            } catch (err) {
+                console.error("Load products", err);
+            }
+        };
+        load();
+    }, []);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
@@ -62,47 +77,66 @@ function Dashboard() {
         setEditingId(null);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!formData.name || !formData.price) {
             return;
         }
 
-        const newProduct = {
-            id: editingId || Date.now(),
+        const payload = {
             name: formData.name,
             price: Number(formData.price),
             category: formData.category,
-            quantity: formData.quantity,
+            quantity: Number(formData.quantity || 0),
             image: formData.image,
         };
 
-        if (editingId) {
-            setProducts((prev) => prev.map((product) => (product.id === editingId ? newProduct : product)));
-        } else {
-            setProducts((prev) => [newProduct, ...prev]);
+        try {
+            if (editingId) {
+                const res = await fetch(`${API_BASE}/products/${editingId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+                const json = await res.json();
+                setProducts((prev) => prev.map((product) => ((product._id || product.id) === editingId ? json.product : product)));
+            } else {
+                const res = await fetch(`${API_BASE}/products`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+                const json = await res.json();
+                setProducts((prev) => [json.product, ...prev]);
+            }
+            resetForm();
+        } catch (err) {
+            console.error("Save product", err);
         }
-
-        resetForm();
     };
 
     const handleEdit = (product) => {
-        setEditingId(product.id);
+        setEditingId(product._id || product.id);
         setFormData({
             name: product.name,
             price: product.price,
             category: product.category,
-            quantity: product.quantity,
+            quantity: product.quantity ?? "",
             image: product.image ?? "",
         });
         manageProductsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     };
 
-    const handleDelete = (id) => {
-        setProducts((prev) => prev.filter((product) => product.id !== id));
-        if (editingId === id) {
-            resetForm();
+    const handleDelete = async (id) => {
+        try {
+            await fetch(`${API_BASE}/products/${id}`, { method: "DELETE" });
+            setProducts((prev) => prev.filter((product) => (product._id || product.id) !== id));
+            if (editingId === id) {
+                resetForm();
+            }
+        } catch (err) {
+            console.error("Delete product", err);
         }
     };
 
@@ -171,7 +205,7 @@ function Dashboard() {
                         <button type="button" className="quick-action-btn" onClick={() => handleQuickAction("add")}>Add Product</button>
                         <button type="button" className="quick-action-btn" onClick={() => handleQuickAction("manage")}>Manage Products</button>
                         <button type="button" className="quick-action-btn" onClick={() => handleQuickAction("edit")}>Edit Products</button>
-                        <button type="button" className="quick-action-btn">Payment Method</button>
+                        <button type="button" className="quick-action-btn"><NavLink to="/admin/payment">Payment Method</NavLink></button>
                     </div>
                 </div>
 
@@ -260,7 +294,7 @@ function Dashboard() {
                                 </div>
 
                                 {products.map((product) => (
-                                    <div key={product.id} className="admin-product-item">
+                                    <div key={product._id || product.id} className="admin-product-item">
                                         <div className="admin-product-item-info">
                                             {product.image ? (
                                                 <img
@@ -275,7 +309,7 @@ function Dashboard() {
                                             <div>
                                                 <h4>{product.name}</h4>
                                                 <p>{product.category}</p>
-                                                <p>Quantity: {product.quantity}</p>
+                                                <p>Quantity: {product.quantity ?? 0}</p>
                                             </div>
                                         </div>
 
@@ -283,7 +317,7 @@ function Dashboard() {
                                             <button type="button" className="secondary-btn" onClick={() => handleEdit(product)}>
                                                 Edit
                                             </button>
-                                            <button type="button" className="danger-btn" onClick={() => handleDelete(product.id)}>
+                                            <button type="button" className="danger-btn" onClick={() => handleDelete(product._id || product.id)}>
                                                 Delete
                                             </button>
                                         </div>

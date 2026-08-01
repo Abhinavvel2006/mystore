@@ -30,6 +30,8 @@ function Login() {
         const data = await response.json();
 
         if (data.success) {
+            const loggedInUser = data.user?.email || email;
+            localStorage.setItem("currentUser", JSON.stringify({ email: loggedInUser }));
             alert(data.message);
             navigate("/");
         } else {
