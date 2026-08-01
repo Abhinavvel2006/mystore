@@ -13,6 +13,7 @@ import Contact from "./pages/Contact";
 
 import AdminLogin from "./admin/pages/Login";
 import Dashboard from "./admin/pages/Dashboard";
+import AdminProduct from "./admin/pages/admin_product";
 
 import { CartProvider } from "./context/CartContext";
 
@@ -42,6 +43,7 @@ function App() {
           {/* Admin */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="products" element={<AdminProduct />} />
           </Route>
 
         </Routes>
