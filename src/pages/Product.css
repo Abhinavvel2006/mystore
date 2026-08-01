@@ -47,13 +47,52 @@
 
 .products-header h3 {
     font-size: 24px;
-    margin-bottom: 6px;
+    margin-bottom: 12px;
     color: #111827;
 }
 
 .products-header p {
     color: #64748b;
     margin: 0;
+}
+
+.product-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.product-filter-bar input,
+.product-filter-bar select,
+.product-filter-bar button {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #dbe4ff;
+    font-size: 14px;
+}
+
+.product-filter-bar input {
+    flex: 1 1 220px;
+    min-width: 220px;
+}
+
+.product-filter-bar select {
+    min-width: 180px;
+    background: white;
+}
+
+.product-filter-bar button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.product-filter-bar button:hover {
+    background: #1d4ed8;
 }
 
 .product-grid {

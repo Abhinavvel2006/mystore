@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./Contact.css";
 
 function Contact() {
@@ -8,6 +8,15 @@ function Contact() {
         subject: "",
         message: "",
     });
+    const [status, setStatus] = useState({ type: "", message: "" });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
+        if (currentUser?.email) {
+            setFormData((prev) => ({ ...prev, email: currentUser.email }));
+        }
+    }, []);
 
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -17,8 +26,37 @@ function Contact() {
         }));
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
+        setIsSubmitting(true);
+        setStatus({ type: "", message: "" });
+
+        try {
+            const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
+            const payload = {
+                ...formData,
+                email: formData.email || currentUser?.email || "",
+            };
+
+            const response = await fetch("http://localhost:5000/api/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "Unable to send message.");
+            }
+
+            setStatus({ type: "success", message: data.message || "Message sent successfully." });
+            setFormData({ name: "", email: "", subject: "", message: "" });
+        } catch (error) {
+            setStatus({ type: "error", message: error.message || "Unable to send message." });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -87,8 +125,12 @@ function Contact() {
                         onChange={handleChange}
                     />
 
-                    <button type="submit" className="contact-btn">
-                        Send Message
+                    {status.message ? (
+                        <p className={`contact-status ${status.type}`}>{status.message}</p>
+                    ) : null}
+
+                    <button type="submit" className="contact-btn" disabled={isSubmitting}>
+                        {isSubmitting ? "Sending..." : "Send Message"}
                     </button>
                 </form>
             </div>

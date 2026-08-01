@@ -33,7 +33,7 @@ function Login() {
             const loggedInUser = data.user?.email || email;
             localStorage.setItem("currentUser", JSON.stringify({ email: loggedInUser }));
             alert(data.message);
-            navigate("/");
+            window.location.href = "/";
         } else {
             alert(data.message);
         }

@@ -4,10 +4,11 @@ import "./admin_product.css";
 
 function AdminProduct(){
     const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({
         name: "",
         price: "",
-        category: "Footwear",
+        category: "",
         quantity: "",
         image: ""
     });
@@ -33,22 +34,36 @@ function AdminProduct(){
     };
 
     const resetForm = () => {
-        setFormData({ name: "", price: "", category: "Footwear", quantity: "", image: "" });
+        setFormData({ name: "", price: "", category: categories[0]?.name || "", quantity: "", image: "" });
         setEditingId(null);
     };
 
     useEffect(() => {
         const load = async () => {
             try {
-                const res = await fetch('http://localhost:5000/api/products');
-                const data = await res.json();
-                setProducts(data || []);
+                const [productsRes, categoriesRes] = await Promise.all([
+                    fetch('http://localhost:5000/api/products'),
+                    fetch('http://localhost:5000/api/categories')
+                ]);
+                const productsData = await productsRes.json();
+                const categoriesData = await categoriesRes.json();
+
+                setProducts(productsData || []);
+                setCategories(categoriesData || []);
             } catch (err) {
                 console.error('Load products', err);
             }
         };
         load();
     }, []);
+
+    useEffect(() => {
+        if (!categories.length) return;
+        setFormData((prev) => ({
+            ...prev,
+            category: prev.category || categories[0].name
+        }));
+    }, [categories]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -148,11 +163,15 @@ function AdminProduct(){
                     <label>
                         Category
                         <select name="category" value={formData.category} onChange={handleChange}>
-                            <option value="Footwear">Footwear</option>
-                            <option value="Electronics">Electronics</option>
-                            <option value="Clothing">Clothing</option>
-                            <option value="Home">Home</option>
-                            <option value="Mobile">Mobile</option>
+                            {categories.length > 0 ? (
+                                categories.map((category) => (
+                                    <option key={category._id || category.id} value={category.name}>
+                                        {category.name}
+                                    </option>
+                                ))
+                            ) : (
+                                <option value="">No categories available</option>
+                            )}
                         </select>
                     </label>
 

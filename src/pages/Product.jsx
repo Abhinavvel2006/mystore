@@ -1,18 +1,30 @@
 import "./Product.css";
 import { useEffect, useState, useContext } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 
 function Product() {
     const { addToCart } = useContext(CartContext);
+    const location = useLocation();
+    const navigate = useNavigate();
     const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [activeCategory, setActiveCategory] = useState("");
+    const [searchTerm, setSearchTerm] = useState("");
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const load = async () => {
             try {
-                const res = await fetch("http://localhost:5000/api/products");
-                const data = await res.json();
-                setProducts(data || []);
+                const [productsRes, categoriesRes] = await Promise.all([
+                    fetch("http://localhost:5000/api/products"),
+                    fetch("http://localhost:5000/api/categories"),
+                ]);
+                const productsData = await productsRes.json();
+                const categoriesData = await categoriesRes.json();
+
+                setProducts(productsData || []);
+                setCategories(categoriesData || []);
             } catch (err) {
                 console.error("Load products", err);
             } finally {
@@ -22,31 +34,104 @@ function Product() {
         load();
     }, []);
 
+    const searchParams = new URLSearchParams(location.search);
+    const searchQuery = searchParams.get("search")?.trim().toLowerCase() || "";
+    const categoryQuery = searchParams.get("category")?.trim() || "";
+
+    useEffect(() => {
+        setActiveCategory(categoryQuery);
+        setSearchTerm(searchQuery);
+    }, [categoryQuery, searchQuery]);
+
+    const handleCategorySelect = (category) => {
+        const params = new URLSearchParams(location.search);
+
+        if (category) {
+            params.set("category", category);
+        } else {
+            params.delete("category");
+        }
+
+        navigate(`/products${params.toString() ? `?${params.toString()}` : ""}`);
+    };
+
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        const params = new URLSearchParams(location.search);
+
+        if (searchTerm.trim()) {
+            params.set("search", searchTerm.trim());
+        } else {
+            params.delete("search");
+        }
+
+        navigate(`/products${params.toString() ? `?${params.toString()}` : ""}`);
+    };
+
+    const filteredProducts = products.filter((p) => {
+        const matchesCategory = !activeCategory || (p.category || "General").toLowerCase() === activeCategory.toLowerCase();
+        const searchText = `${p.name || ""} ${p.description || ""} ${p.category || ""}`.toLowerCase();
+        const matchesSearch = !searchTerm.trim() || searchText.includes(searchTerm.trim().toLowerCase());
+
+        return matchesCategory && matchesSearch;
+    });
+
     return (
         <>
             <div className="product-page">
                 <h2>Products</h2>
                 <nav className="category-nav" aria-label="Product Categories">
-                    <a href="#footwear">Footwear</a>
-                    <a href="#Electronics">Electronics</a>
-                    <a href="#Clothing">Clothing</a>
-                    <a href="#Home">Home & Living</a>
-                    <a href="#Mobile">Mobiles</a>
-                    <a href="#PCs">PCs</a>
-                    <a href="#accessories">Accessories</a>
-                    <a href="#furnitures">Furnitures</a>
+                    <a href="#" onClick={(e) => { e.preventDefault(); handleCategorySelect(""); }}>
+                        All
+                    </a>
+                    {categories.map((category) => (
+                        <a
+                            key={category._id || category.id}
+                            href="#"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleCategorySelect(category.name);
+                            }}
+                        >
+                            {category.name}
+                        </a>
+                    ))}
                 </nav>
 
                 <div className="products-list dynamic">
                     <div className="products-header">
-                        <h3>Featured Products</h3>
+                        <h3>
+                            {searchTerm.trim() || activeCategory
+                                ? `${searchTerm.trim() ? `Search results for "${searchTerm.trim()}"` : ""}${searchTerm.trim() && activeCategory ? " • " : ""}${activeCategory ? `${activeCategory} Products` : ""}`.trim()
+                                : "Featured Products"}
+                        </h3>
+                        <form className="product-filter-bar" onSubmit={handleSearchSubmit}>
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Search products"
+                            />
+                            <select
+                                value={activeCategory}
+                                onChange={(e) => handleCategorySelect(e.target.value)}
+                            >
+                                <option value="">All Categories</option>
+                                {categories.map((category) => (
+                                    <option key={category._id || category.id} value={category.name}>
+                                        {category.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <button type="submit">Filter</button>
+                        </form>
                     </div>
 
                     {loading ? (
                         <div className="products-loading">Loading products...</div>
-                    ) : products.length > 0 ? (
+                    ) : filteredProducts.length > 0 ? (
                         <div className="product-grid">
-                            {products.map((p) => (
+                            {filteredProducts.map((p) => (
                                 <div key={p._id || p.id} className="product-card-item">
                                     <div className="product-image-wrap">
                                         {p.image ? (
@@ -85,7 +170,7 @@ function Product() {
                             ))}
                         </div>
                     ) : (
-                        <div className="products-empty">No products available right now.</div>
+                        <div className="products-empty">No products available for this category right now.</div>
                     )}
                 </div>
             </div>

@@ -3,6 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const nodemailer = require("nodemailer");
 const User = require("./model/user");
 const Admin = require("./model/admin");
 const Product = require("./model/product");
@@ -22,6 +23,15 @@ mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("MongoDB Connected"))
 .catch(err => console.log(err));
 
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT || 587),
+  secure: process.env.SMTP_SECURE === "true",
+  auth: process.env.SMTP_USER && process.env.SMTP_PASS ? {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  } : undefined,
+});
 
 app.post("/api/register", async (req, res) => {
   try {
@@ -261,6 +271,46 @@ app.put('/api/orders/:id', async (req, res) => {
     const o = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json({ success: true, order: o });
   } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, email, subject, message } = req.body;
+
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({ success: false, message: 'Please fill in all fields.' });
+    }
+
+    const recipientEmail = process.env.CONTACT_TO || process.env.SMTP_FROM || process.env.SMTP_USER || 'support@mystore.com';
+    const senderEmail = email.trim();
+    const fromAddress = process.env.SMTP_FROM || process.env.SMTP_USER || senderEmail;
+
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.warn('SMTP is not configured. Contact message was not sent.');
+      return res.json({
+        success: true,
+        message: 'Message received. Configure SMTP credentials to send it by email.'
+      });
+    }
+
+    await transporter.sendMail({
+      from: fromAddress,
+      to: recipientEmail,
+      replyTo: senderEmail,
+      subject: `New Contact Message: ${subject}`,
+      html: `
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Subject:</strong> ${subject}</p>
+        <p><strong>Message:</strong><br/>${message}</p>
+      `,
+    });
+
+    res.json({ success: true, message: 'Your message has been sent successfully.' });
+  } catch (err) {
+    console.error('Contact form error:', err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
