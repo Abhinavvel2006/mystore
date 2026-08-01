@@ -37,6 +37,20 @@ import { CartContext } from "../context/CartContext";
 
 function Product(){
     const { addToCart } = useContext(CartContext);
+    const [products, setProducts] = useState([]);
+
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const res = await fetch('http://localhost:5000/api/products');
+                const data = await res.json();
+                setProducts(data || []);
+            } catch (err) {
+                console.error('Load products', err);
+            }
+        };
+        load();
+    }, []);
     return(
         <>
         <div className="product-page">
@@ -51,6 +65,23 @@ function Product(){
                 <a href="#accessories">Accessories</a>
                 <a href="#furnitures">Furnitures</a>
             </nav>
+            {products.length > 0 && (
+                <div className="products-list dynamic">
+                    <h3>Products from backend</h3>
+                    <div className="product-grid">
+                        {products.map((p) => (
+                            <div key={p._id || p.id} className="product-card-item">
+                                {p.image ? <img src={p.image} alt={p.name} /> : <div className="thumb">{p.name.charAt(0)}</div>}
+                                <h4 className="product-title">{p.name}</h4>
+                                <div className="price">${Number(p.price).toFixed(2)}</div>
+                                <div className="card-actions">
+                                    <button className="order-btn" onClick={() => addToCart({ id: p._id || p.id, name: p.name, price: p.price, image: p.image })}>Buy Now</button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
             <div className="products-list">
                 <div className="product-card" id="footwear">
                     <h3>Footwear</h3>

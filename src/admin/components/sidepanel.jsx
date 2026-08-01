@@ -21,10 +21,10 @@ function Sidepanel(){
                             <NavLink to="/admin/Products">Products</NavLink>
                         </li>
                         <li>
-                            <NavLink to="/admin/Categories">Categories</NavLink>
+                            <NavLink to="/admin/orders">Orders</NavLink>
                         </li>
                         <li>
-                            <NavLink to="/admin/Orders">Orders</NavLink>
+                            <NavLink to="/admin/Categories">Categories</NavLink>
                         </li>
                         <h6>SETTINGS</h6>
                         <li>

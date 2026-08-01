@@ -55,19 +55,19 @@ function About() {
                 <h2>Our Statistics</h2>
                 <p>We help you to unleash the power within your business.</p>
                 <div className="statistics-cards">
-                    <div className="card">
+                    <div className="user-card">
                         <h3>260+</h3>
                         <p>Active Employees</p>
                     </div>
-                    <div className="card">
+                    <div className="user-card">
                         <h3>10000+</h3>
                         <p>Products</p>
                     </div>
-                    <div className="card">
+                    <div className="user-card">
                         <h3>2500+</h3>
                         <p>Happy Customers</p>
                     </div>
-                    <div className="card">
+                    <div className="user-card">
                         <h3>5000+</h3>
                         <p>Orders Delivered</p>
                     </div>

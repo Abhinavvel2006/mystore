@@ -194,25 +194,25 @@ body {
   margin-top: 30px;
 }
 
-.statistics-cards .card {
+.statistics-cards .user-card {
   background-color: #ffffff;
   padding: 25px;
   border-radius: 8px;
   border-top: 4px solid #0066cc;
 }
 
-.statistics-cards .card:hover {
+.statistics-cards .user-card:hover {
   background-color: #f5f5f5;
 }
 
-.statistics-cards .card h3 {
+.statistics-cards .user-card h3 {
   font-size: 2.2rem;
   color: #0066cc;
   margin-bottom: 10px;
   font-weight: 700;
 }
 
-.statistics-cards .card p {
+.statistics-cards .user-card p {
   font-size: 0.95rem;
   color: #333333;
 }

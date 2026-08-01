@@ -70,9 +70,10 @@
 }
 
 .dashboard-main {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
     gap: 20px;
-    align-items: flex-start;
+    align-items: start;
     margin-top: 8px;
 }
 
@@ -82,8 +83,12 @@
     border-radius: 12px;
     padding: 18px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    flex: 1;
     min-width: 0;
+}
+
+.dashboard-manage-products {
+    grid-column: 1 / -1;
+    margin-top: 8px;
 }
 
 .dashboard-orders h2,
@@ -99,7 +104,8 @@
     gap: 10px;
 }
 
-.action-grid button {
+.action-grid button,
+.quick-action-btn {
     padding: 10px 12px;
     border: none;
     border-radius: 8px;
@@ -109,7 +115,8 @@
     cursor: pointer;
 }
 
-.action-grid button:hover {
+.action-grid button:hover,
+.quick-action-btn:hover {
     background: #1d4ed8;
 }
 
