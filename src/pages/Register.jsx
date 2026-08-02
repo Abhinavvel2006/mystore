@@ -4,6 +4,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { faPhone, faBagShopping } from "@fortawesome/free-solid-svg-icons";
 import "./Register.css";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "../firebase/firebase";
 
 function Register() {
     const [email, setEmail] = useState("");
@@ -39,6 +41,51 @@ function Register() {
             navigate("/login");
         } else {
             alert(data.message);
+        }
+    };
+
+    const provider = new GoogleAuthProvider();
+    const googleRegister = async () => {
+        try{
+            const result = await signInWithPopup(auth, provider);
+
+            const user = result.user;
+
+            localStorage.setItem(
+                "currentUser",
+                JSON.stringify({
+                    name: user.displayName,
+                    email: user.email,
+                    provider: "google",
+                })
+            );
+
+            const response = await fetch("http://localhost:5000/api/google-login",
+                {
+                    method: "POST",
+                    headers:{
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        name: user.displayName,
+                        email: user.email,
+                        provider: "google",
+                    }),
+                }
+            );
+
+            const data = await response.json();
+            
+            if (data.success) {
+                window.location.href="/";
+            }
+            else{
+                alert(data.message);
+            }
+        }
+
+        catch(error){
+            console.error(error);
         }
     };
 
@@ -96,7 +143,7 @@ function Register() {
                     </div>
 
                     <div className="social-buttons">
-                        <button type="button" className="social-btn">
+                        <button type="button" className="social-btn" onClick={googleRegister}>
                             <FontAwesomeIcon icon={faGoogle} />
                             <span>Google</span>
                         </button>

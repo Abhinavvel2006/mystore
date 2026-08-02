@@ -10,18 +10,19 @@ const Product = require("./model/product");
 const Category = require("./model/category");
 const Order = require("./model/order");
 
+
 const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({
-    extended: true,
-    limit: "50mb"
+  extended: true,
+  limit: "50mb"
 }));
 
 mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log("MongoDB Connected"))
-.catch(err => console.log(err));
+  .then(() => console.log("MongoDB Connected"))
+  .catch(err => console.log(err));
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -44,7 +45,7 @@ app.post("/api/register", async (req, res) => {
       });
     }
 
-    const existingUser = await User.findOne({email});
+    const existingUser = await User.findOne({ email });
 
     if (existingUser) {
       return res.json({
@@ -66,13 +67,13 @@ app.post("/api/register", async (req, res) => {
       user: { email: newUser.email },
     });
   }
-  catch(error){
+  catch (error) {
     console.log(error);
 
-  res.status(500).json({
-    success: false,
-    message: "Server Error",
-  });
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
   }
 });
 
@@ -84,29 +85,29 @@ app.post("/api/login", async (req, res) => {
     const user = await User.findOne({
       email,
       password,
-  });
+    });
 
     if (!user) {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid email or Password",
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or Password",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Login Successful",
+      user: { email: user.email },
     });
   }
+  catch (error) {
+    console.log(error);
 
-  res.json({
-    success: true,
-    message: "Login Successful",
-    user: { email: user.email },
-  });
-}
-catch(error){
-  console.log(error);
-
-  res.status(500).json({
-    success: false,
-    message: "Server Error",
-  });
-}
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
 });
 
 // admin section 
@@ -242,28 +243,28 @@ app.get('/api/orders/user/:email', async (req, res) => {
 });
 
 app.post("/api/orders", async (req, res) => {
-    try {
+  try {
 
-        console.log("Incoming Order:");
-        console.log(req.body);
+    console.log("Incoming Order:");
+    console.log(req.body);
 
-        const o = new Order(req.body);
+    const o = new Order(req.body);
 
-        await o.save();
+    await o.save();
 
-        res.json({
-            success: true,
-            order: o
-        });
+    res.json({
+      success: true,
+      order: o
+    });
 
-    } catch (err) {
-        console.log(err);
+  } catch (err) {
+    console.log(err);
 
-        res.status(500).json({
-            success: false,
-            message: err.message
-        });
-    }
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
 });
 
 app.put('/api/orders/:id', async (req, res) => {
@@ -312,6 +313,35 @@ app.post('/api/contact', async (req, res) => {
   } catch (err) {
     console.error('Contact form error:', err);
     res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post("/api/google-login", async (req, res) => {
+  try {
+    const { name, email, provider } = req.body;
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = new User({
+        name,
+        email,
+        provider,
+      });
+
+      await user.save();
+    }
+
+    res.json({
+      success: true,
+      user,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 });
 
