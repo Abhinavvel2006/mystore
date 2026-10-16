@@ -1,5 +1,16 @@
+import { useContext } from "react";
 import { NavLink } from "react-router-dom";
-import background from "../assets/home.jpg";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faArrowRight,
+  faBolt,
+  faHeadphones,
+  faRotateLeft,
+  faShieldHalved,
+  faStar,
+} from "@fortawesome/free-solid-svg-icons";
+import { CartContext } from "../context/CartContext";
+import hero from "../assets/hero.png";
 import product1 from "../assets/product1.jpg";
 import product2 from "../assets/product2.jpg";
 import product3 from "../assets/product3.jpg";
@@ -10,306 +21,219 @@ import category1 from "../assets/category1.jpg";
 import category2 from "../assets/category2.jpg";
 import category3 from "../assets/category3.jpg";
 import "./Home.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect,useState } from "react";
-import { useContext } from "react";
-import { CartContext } from "../context/CartContext";
 
+const categories = [
+  {
+    name: "Tech & electronics",
+    image: category1,
+    caption: "Smart picks for every setup",
+  },
+  {
+    name: "Style edit",
+    image: category2,
+    caption: "Fresh looks, easy choices",
+  },
+  {
+    name: "Home refresh",
+    image: category3,
+    caption: "Make space feel like yours",
+  },
+  {
+    name: "Mobile essentials",
+    image: product3,
+    caption: "Stay connected in style",
+  },
+];
 
-function Home(){
-    const [message,setMessage] = useState("");
-    const { addToCart } = useContext(CartContext);
-    useEffect(() =>{
-        fetch("http://localhost:5000/api/message")
-        .then((res) => res.json())
-        .then((data) => setMessage(data.message))
-        .catch((err) => console.log(err));
-    }, []);
-    return(
-        <>
-        <div className="home" style={{ backgroundImage: `url(${background})` }}>
-            <div className="home-content">
-                <h2>Discover Amazing</h2>
-                <h3>Products!</h3>
-                <div className="home-items">
-                    <p>Explore our wide range of products and find the perfect items for you. From electronics to fashion, we have everything you need to enhance your lifestyle.</p>
-                </div>
-                <button className="shop-now-btn"><NavLink to="/products">Shop Now</NavLink></button>
-                <div className="home-offer">
-                    <div className="offers-card1">
-                        <FontAwesomeIcon></FontAwesomeIcon>
-                        <h6>Secure payment</h6>
-                        <p>100% secure</p>
-                    </div>
-                    <div className="offers-card2">
-                        <FontAwesomeIcon></FontAwesomeIcon>
-                        <h6>Fast delivery</h6>
-                        <p>on time delivery</p>
-                    </div>
-                    <div className="offers-card3">
-                        <FontAwesomeIcon></FontAwesomeIcon>
-                        <h6>Best Quality</h6>
-                        <p>Premium Quality</p>
-                    </div>
-                </div>
-            </div>
+const products = [
+  {
+    id: 1,
+    name: "Nike Footwear",
+    price: 2.99,
+    image: product1,
+    badge: "Trending",
+  },
+  {
+    id: 2,
+    name: "Casio Watch",
+    price: 29.99,
+    image: product2,
+    badge: "Best value",
+  },
+  {
+    id: 3,
+    name: "Apple iPhone",
+    price: 999.99,
+    image: product3,
+    badge: "Popular",
+  },
+  {
+    id: 4,
+    name: "Samsung TV",
+    price: 499.99,
+    image: product4,
+    badge: "Home pick",
+  },
+  {
+    id: 5,
+    name: "Adidas Sneakers",
+    price: 79.99,
+    image: product5,
+    badge: "Just in",
+  },
+  {
+    id: 6,
+    name: "Sony Headphones",
+    price: 199.99,
+    image: product6,
+    badge: "Top rated",
+  },
+];
+
+function Home() {
+  const { addToCart } = useContext(CartContext);
+
+  return (
+    <main className="market-home">
+      <section className="hero-panel">
+        <div className="hero-copy">
+          <p className="eyebrow">
+            <FontAwesomeIcon icon={faBolt} /> New season, new finds
+          </p>
+          <h1>
+            Find your next <em>everyday favorite.</em>
+          </h1>
+          <p className="hero-text">
+            Thoughtful products for your home, wardrobe, and everyday rituals —
+            all in one easy place.
+          </p>
+          <div className="hero-cta">
+            <NavLink to="/products">
+              Shop the collection <FontAwesomeIcon icon={faArrowRight} />
+            </NavLink>
+            <NavLink className="text-cta" to="/about">
+              Why MyStore
+            </NavLink>
+          </div>
+          <div className="hero-proof">
+            <span>
+              <b>20k+</b> happy shoppers
+            </span>
+            <span>
+              <b>4.8/5</b> average rating
+            </span>
+          </div>
         </div>
-        <div className="home-about-us">
-            <h2>Personalized Recommendations Just for You!</h2>
-            <p>Our AI-powered recommendation engine analyzes your browsing and purchase history to suggest products that match your preferences. Discover new items you'll love with our personalized recommendations.</p>
-            <div className="categories">
-                <div className="category-card">
-                    <img src={category1} alt="category1"></img>
-                    <div className="card-body">
-                    <h3 className="product-title">Electronics</h3>
-                    <div className="card-actions">
-                    <button className="visit-btn"><NavLink to="/products">Visit Product</NavLink></button>
-                    </div>
-                    </div>
-                </div>
-                <div className="category-card">
-                    <img src={category2} alt="category2"></img>
-                    <div className="card-body">
-                    <h3 className="product-title">Fashion</h3>
-                    <div className="card-actions">
-                    <button className="visit-btn"><NavLink to="/products">Visit Product</NavLink></button>
-                    </div>
-                    </div>
-                </div>
-                <div className="category-card">
-                    <img src={category3} alt="category3"></img>
-                    <div className="card-body">
-                    <h3 className="product-title">Home & Living</h3>
-                    <div className="card-actions">
-                    <button className="visit-btn"><NavLink to="/products">Visit Product</NavLink></button>
-                    </div>
-                    </div>
-                </div>
-                <div className="category-card">
-                    <img src={product3} alt="category4"></img>
-                    <div className="card-body">
-                    <h3 className="product-title">Mobiles</h3>
-                    <div className="card-actions">
-                    <button className="visit-btn"><NavLink to="/products">Visit Product</NavLink></button>
-                    </div>
-                    </div>
-                </div>
-            </div>
+        <div className="hero-visual">
+          <div className="hero-orbit orbit-one" />
+          <div className="hero-orbit orbit-two" />
+          <img src={hero} alt="A curated selection of MyStore products" />
+          <div className="floating-rating">
+            <FontAwesomeIcon icon={faStar} /> 4.8 <span>customer favorite</span>
+          </div>
         </div>
-        <div className="products-preview">
-            <h2>Featured Products</h2>
-            <div className="slider-wrapper">
-                <div className="product-list">
-                    <div className="card1">
-                        <img src={product1} alt="product1"></img>
-                        <h3>Nike Footwear</h3>
-                    <p>$2.99</p>
-                    <button className="order-btn"
-                    onClick={() => 
-                        addToCart({
-                            id: 1,
-                            name: "Nike Footwear",
-                            price: 2.99, 
-                            image: product1
-                        })
-                    }
-                    >
-                    Order Now
-                    </button>
-                </div>
-                <div className="card2">
-                    <img src={product2} alt="product2"></img>
-                    <h3>Casio Watch</h3>
-                    <p>$29.99</p>
-                    <button className="order-btn" 
-                    onClick={() => 
-                        addToCart({
-                            id: 2,
-                            name: "Casio Watch",
-                            price: 29.99,
-                            image: product2
-                        })
-                    }
-                    >
-                    Order Now
-                    </button>
-                </div>
-                <div className ="card3">
-                    <img src={product3} alt="product3"></img>
-                    <h3>Apple iPhone</h3>
-                    <p>$999.99</p>
-                    <button className="order-btn" 
-                    onClick={() => 
-                        addToCart({
-                            id: 3,
-                            name: "Apple iphone",
-                            price: 999.99,
-                            image: product3
-                        })
-                    }
-                    >
-                    Order Now
-                    </button>
-                </div>
-                <div className="card4">
-                    <img src={product4} alt="product4"></img>
-                    <h3>Samsung TV</h3>
-                    <p>$499.99</p>
-                    <button className="order-btn"
-                    onClick={() => 
-                        addToCart({
-                            id: 4,
-                            name: "Samsung TV",
-                            price: 499.99,
-                            image: product4
-                        })
-                    }
-                    >
-                    Order Now
-                    </button>
-                </div>
-                <div className="card5">
-                    <img src={product5} alt="product5"></img>
-                    <h3>Adidas Sneakers</h3>
-                    <p>$79.99</p>
-                    <button className="order-btn"
-                    onClick={() =>
-                        addToCart({
-                            id: 5,
-                            name: "Adidas Sneakers",
-                            price: 79.99,
-                            image: product5
-                        })
-                    }
-                    >
-                    Order Now
-                    </button>
-                </div>
-                <div className="card6">
-                    <img src={product6} alt="product6"></img>
-                    <h3>Sony Headphones</h3>
-                    <p>$199.99</p>
-                    <button className="order-btn"
-                    onClick={() =>
-                        addToCart({
-                            id: 6,
-                            name: "Sony HeadPhones",
-                            price: 199.99,
-                            image: product6
-                        })
-                    }
-                    >
-                    Order Now
-                    </button>
-                </div>
-                {/* <duplicate> */}
-                <div className="card1">
-                    <img src={product1} alt="product1"></img>
-                    <h3>Nike Footwear</h3>
-                    <p>$2.99</p>
-                    <button className="order-btn"
-                    onClick={() =>
-                        addToCart({
-                            id: 1,
-                            name: "Nike Footwear",
-                            price: 2.99,
-                            image: product1
-                        })
-                    }
-                    >
-                    Order Now
-                    </button>
-                </div>
-                <div className="card2">
-                    <img src={product2} alt="product2"></img>
-                    <h3>Casio Watch</h3>
-                    <p>$29.99</p>
-                    <button className="order-btn"
-                    onClick={() =>
-                        addToCart({
-                            id: 2,
-                            name: "Casio Watch",
-                            price: 29.99,
-                            image: product2
-                        })
-                    }
-                    >
-                    Order Now
-                    </button>
-                </div>
-                <div className ="card3">
-                    <img src={product3} alt="product3"></img>
-                    <h3>Apple iPhone</h3>
-                    <p>$999.99</p>
-                    <button className="order-btn"
-                    onClick={() =>
-                        addToCart({
-                            id: 3,
-                            name: "Apple iPhone",
-                            price: 999.99,
-                            image: product3
-                        })
-                    }
-                    >
-                    Order Now
-                    </button>
-                </div>
-                <div className="card4">
-                    <img src={product4} alt="product4"></img>
-                    <h3>Samsung TV</h3>
-                    <p>$499.99</p>
-                    <button className="order-btn"
-                    onClick={() =>
-                        addToCart({
-                            id: 4,
-                            name: "Samsung TV",
-                            price: 499.99,
-                            image: product4
-                        })
-                    }
-                    >
-                    Order Now
-                    </button>
-                </div>
-                <div className="card5">
-                    <img src={product5} alt="product5"></img>
-                    <h3>Adidas Sneakers</h3>
-                    <p>$79.99</p>
-                    <button className="order-btn"
-                    onClick={() =>
-                        addToCart({
-                            id: 5,
-                            name: "Adidas Sneakers",
-                            price: 79.99,
-                            image: product5
-                        })
-                    }
-                    >
-                    Order Now
-                    </button>
-                </div>
-                <div className="card6">
-                    <img src={product6} alt="product6"></img>
-                    <h3>Sony Headphones</h3>
-                    <p>$199.99</p>
-                    <button className="order-btn"
-                    onClick={() =>
-                        addToCart({
-                            id: 6,
-                            name: "Sony Headphones",
-                            price: 199.99,
-                            image: product6
-                        })
-                    }
-                    >
-                    Order Now
-                    </button>
-                </div>
-            </div>
+      </section>
+
+      <section className="benefit-row">
+        <div>
+          <FontAwesomeIcon icon={faShieldHalved} />
+          <span>
+            <b>Secure checkout</b>Protected payments
+          </span>
         </div>
-    </div>
-    </>
-    );
+        <div>
+          <FontAwesomeIcon icon={faRotateLeft} />
+          <span>
+            <b>Easy returns</b>Seven days, no stress
+          </span>
+        </div>
+        <div>
+          <FontAwesomeIcon icon={faHeadphones} />
+          <span>
+            <b>Here to help</b>Friendly human support
+          </span>
+        </div>
+      </section>
+
+      <section className="content-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Browse your way</p>
+            <h2>Made for every kind of day</h2>
+          </div>
+          <NavLink to="/products">
+            See everything <FontAwesomeIcon icon={faArrowRight} />
+          </NavLink>
+        </div>
+        <div className="category-grid">
+          {categories.map((category) => (
+            <NavLink
+              to="/products"
+              className="category-tile"
+              key={category.name}
+            >
+              <img src={category.image} alt="" />
+              <div>
+                <span>{category.caption}</span>
+                <h3>{category.name}</h3>
+                <b>
+                  Explore <FontAwesomeIcon icon={faArrowRight} />
+                </b>
+              </div>
+            </NavLink>
+          ))}
+        </div>
+      </section>
+
+      <section className="content-section arrivals-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Curated for you</p>
+            <h2>Popular right now</h2>
+          </div>
+          <NavLink to="/products">
+            View all products <FontAwesomeIcon icon={faArrowRight} />
+          </NavLink>
+        </div>
+        <div className="product-grid">
+          {products.map((product) => (
+            <article className="product-card" key={product.id}>
+              <div className="product-image">
+                <img src={product.image} alt={product.name} />
+                <span>{product.badge}</span>
+              </div>
+              <div className="product-info">
+                <p className="rating">
+                  <FontAwesomeIcon icon={faStar} /> 4.8
+                </p>
+                <h3>{product.name}</h3>
+                <div>
+                  <strong>${product.price.toFixed(2)}</strong>
+                  <button onClick={() => addToCart(product)}>
+                    Add to cart
+                  </button>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="membership-banner">
+        <div>
+          <p className="eyebrow">The MyStore difference</p>
+          <h2>Good choices should feel easy.</h2>
+          <p>
+            Discover useful things, clear prices, and service that stays with
+            you after checkout.
+          </p>
+        </div>
+        <NavLink to="/about">
+          Meet MyStore <FontAwesomeIcon icon={faArrowRight} />
+        </NavLink>
+      </section>
+    </main>
+  );
 }
 
 export default Home;

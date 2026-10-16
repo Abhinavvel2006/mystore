@@ -4,17 +4,17 @@ import AdminHeader from "../admin/components/header";
 import "./AdminLayout.css";
 
 function AdminLayout() {
-    return (
-        <div className="admin-layout">
-            <SidePanel />
-            <div className="admin-main">
-                <AdminHeader />
-                <main className="admin-content">
-                    <Outlet />
-                </main>
-            </div>
-        </div>
-    );
+  return (
+    <div className="admin-layout">
+      <SidePanel />
+      <div className="admin-main">
+        <AdminHeader />
+        <main className="admin-content">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
 }
 
 export default AdminLayout;

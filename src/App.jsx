@@ -27,9 +27,7 @@ function App() {
   return (
     <CartProvider>
       <BrowserRouter>
-
         <Routes>
-
           {/* User Website */}
           <Route element={<UserLayout />}>
             <Route path="/" element={<Home />} />
@@ -63,9 +61,7 @@ function App() {
             <Route path="settings" element={<AdminSettings />} />
             <Route path="notifications" element={<AdminNotifications />} />
           </Route>
-
         </Routes>
-
       </BrowserRouter>
     </CartProvider>
   );

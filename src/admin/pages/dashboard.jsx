@@ -1,335 +1,328 @@
-import { NavLink } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
-import "./dashboard.css";
-import "./admin_product.css";
+import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { EmptyState, Icon, Metric, PageHeading } from "../components/Workspace";
+import OrderTable from "../components/OrderTable";
+import useOrders from "../useOrders";
 
-const API_BASE = "http://localhost:5000/api";
+export default function Dashboard() {
+  const [products, setProducts] = useState([]);
+  const {
+    orders,
+    loading: ordersLoading,
+    error: ordersError,
+    reload: reloadOrders,
+  } = useOrders();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [revision, setRevision] = useState(0);
 
-function ManageOrder({ orders }) {
-    if (!orders || orders.length === 0) {
-        return (
-            <div className="manage-order">
-                <div className="empty-state">
-                    <p>No orders yet</p>
-                </div>
+  useEffect(() => {
+    let active = true;
+    fetch("http://localhost:5000/api/products")
+      .then((res) => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then((data) => {
+        if (!Array.isArray(data)) throw new Error();
+        if (active) {
+          setProducts(data);
+          setError("");
+        }
+      })
+      .catch(() => {
+        if (active)
+          setError(
+            "We couldn't load your catalogue. Check your connection and try again.",
+          );
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [revision]);
+
+  const inStock = products.filter((p) => Number(p.quantity) > 5).length;
+  const lowStock = products.filter(
+    (p) => Number(p.quantity) > 0 && Number(p.quantity) <= 5,
+  ).length;
+  const outOfStock = products.filter(
+    (p) => Number(p.quantity || 0) <= 0,
+  ).length;
+  const units = products.reduce(
+    (sum, p) => sum + Math.max(0, Number(p.quantity) || 0),
+    0,
+  );
+  const categoryCount = new Set(products.map((p) => p.category || "General"))
+    .size;
+  const metric = (value) => (loading || error ? "—" : value);
+  const date = new Intl.DateTimeFormat("en", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "Asia/Calcutta",
+  }).format(new Date());
+
+  return (
+    <div className="aw">
+      <PageHeading
+        title="Store overview"
+        section="Dashboard"
+        description="Your catalogue, inventory, and next steps at a glance."
+      >
+        <span className="aw-pill neutral">{date}</span>
+        <Link
+          className="aw-button aw-button-primary"
+          to="/admin/products?new=1"
+        >
+          <Icon name="plus" /> Add product
+        </Link>
+      </PageHeading>
+      {error && (
+        <div className="aw-notice error" role="alert">
+          {error}{" "}
+          <button
+            className="aw-button"
+            onClick={() => {
+              setLoading(true);
+              setRevision((value) => value + 1);
+            }}
+          >
+            Try again
+          </button>
+        </div>
+      )}
+      <div className="aw-metrics">
+        <Metric
+          label="Total products"
+          value={metric(products.length)}
+          detail="Products in your catalogue"
+          icon="box"
+        />
+        <Metric
+          label="Units in stock"
+          value={metric(units)}
+          detail="Available across all products"
+          icon="check"
+          tone="blue"
+        />
+        <Metric
+          label="Low stock"
+          value={metric(lowStock)}
+          detail="Products with 1–5 units left"
+          icon="warning"
+          tone="amber"
+        />
+        <Metric
+          label="Active categories"
+          value={metric(categoryCount)}
+          detail="Categories with products"
+          icon="category"
+          tone="purple"
+        />
+      </div>
+      <div className="aw-split">
+        <section className="aw-surface">
+          <div className="aw-panel-heading">
+            <div>
+              <h2>Catalogue snapshot</h2>
+              <p>Keep your product listings up to date.</p>
             </div>
-        );
-    }
-
-    return (
-        <div className="manage-order">
-            {orders.map((order) => (
-                <div className="order-item" key={order.id}>
-                    <span>{order.customer}</span>
-                    <span>{order.status}</span>
+            <Link className="aw-text-link" to="/admin/products">
+              Manage <Icon name="arrow" />
+            </Link>
+          </div>
+          {loading ? (
+            <EmptyState
+              title="Loading your catalogue"
+              description="Fetching your latest products."
+            />
+          ) : error ? (
+            <EmptyState
+              title="Catalogue unavailable"
+              description="Your products will appear here when the connection is restored."
+            />
+          ) : products.length ? (
+            <div className="aw-table-scroll">
+              <table className="aw-table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Availability</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {products.slice(0, 5).map((p) => (
+                    <tr key={p._id || p.id}>
+                      <td>
+                        <div className="aw-product-cell">
+                          {p.image ? (
+                            <img className="aw-thumb" src={p.image} alt="" />
+                          ) : (
+                            <span className="aw-thumb">
+                              <Icon name="box" />
+                            </span>
+                          )}
+                          <div>
+                            <strong>{p.name}</strong>
+                            <small>{p.category || "General"}</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>${Number(p.price || 0).toFixed(2)}</td>
+                      <td>
+                        <span
+                          className={`aw-pill ${Number(p.quantity) > 5 ? "" : "warn"}`}
+                        >
+                          {Number(p.quantity) > 0
+                            ? `${p.quantity} in stock`
+                            : "Out of stock"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <EmptyState
+              title="Your catalogue starts here"
+              description="Add your first product to start building your storefront."
+            >
+              <Link
+                className="aw-button aw-button-primary"
+                to="/admin/products?new=1"
+              >
+                <Icon name="plus" /> Create product
+              </Link>
+            </EmptyState>
+          )}
+          <div className="aw-help-panel">
+            A complete name, clear image, and accurate stock count help
+            customers shop with confidence.
+          </div>
+        </section>
+        <section className="aw-surface">
+          <div className="aw-panel-heading">
+            <div>
+              <h2>Inventory health</h2>
+              <p>Product availability across your store</p>
+            </div>
+            <Icon name="box" />
+          </div>
+          {loading || error ? (
+            <EmptyState
+              title={loading ? "Loading inventory" : "Inventory unavailable"}
+              description="Stock levels appear after the catalogue loads."
+            />
+          ) : (
+            <div className="aw-panel-body">
+              {[
+                ["Healthy stock", inStock],
+                ["Running low", lowStock],
+                ["Out of stock", outOfStock],
+              ].map(([label, count]) => (
+                <div className="aw-health-row" key={label}>
+                  <span>{label}</span>
+                  <progress
+                    max={products.length || 1}
+                    value={count}
+                    aria-label={label}
+                  />
+                  <strong>{count}</strong>
                 </div>
+              ))}
+            </div>
+          )}
+          <div className="aw-help-panel">
+            <Link className="aw-text-link" to="/admin/notifications">
+              Review inventory alerts <Icon name="arrow" />
+            </Link>
+          </div>
+        </section>
+      </div>
+      <div className="aw-split">
+        <section className="aw-surface">
+          <div className="aw-panel-heading">
+            <div>
+              <h2>Recent orders</h2>
+              <p>Track your latest customer orders.</p>
+            </div>
+            <Link className="aw-text-link" to="/admin/orders">
+              View all <Icon name="arrow" />
+            </Link>
+          </div>
+          {ordersLoading ? (
+            <EmptyState
+              icon="order"
+              title="Loading orders"
+              description="Fetching your latest order activity."
+            />
+          ) : ordersError ? (
+            <EmptyState
+              icon="order"
+              title="Orders unavailable"
+              description={ordersError}
+            >
+              <button className="aw-button" onClick={reloadOrders}>
+                Try again
+              </button>
+            </EmptyState>
+          ) : orders.length ? (
+            <OrderTable orders={orders.slice(0, 5)} />
+          ) : (
+            <EmptyState
+              icon="order"
+              title="No orders yet"
+              description="New customer orders will appear here."
+            />
+          )}
+        </section>
+        <section className="aw-surface">
+          <div className="aw-panel-heading">
+            <div>
+              <h2>Quick access</h2>
+              <p>A shorter path to everyday tasks</p>
+            </div>
+          </div>
+          <div className="aw-task-list">
+            {[
+              [
+                "category",
+                "Organize categories",
+                "Group products for easy discovery",
+                "/admin/categories",
+              ],
+              [
+                "wallet",
+                "Payment overview",
+                "Review methods and expenses",
+                "/admin/payment",
+              ],
+              [
+                "settings",
+                "Workspace settings",
+                "Manage your preferences",
+                "/admin/settings",
+              ],
+            ].map(([icon, title, detail, path]) => (
+              <Link className="aw-task" key={path} to={path}>
+                <span className="aw-task-icon">
+                  <Icon name={icon} />
+                </span>
+                <span className="aw-task-copy">
+                  <strong>{title}</strong>
+                  <small>{detail}</small>
+                </span>
+                <Icon name="arrow" />
+              </Link>
             ))}
-        </div>
-    );
+          </div>
+        </section>
+      </div>
+    </div>
+  );
 }
-function Dashboard() {
-    const [orders] = useState([]);
-    const [products, setProducts] = useState([]);
-    const [formData, setFormData] = useState({
-        name: "",
-        price: "",
-        category: "Footwear",
-        quantity: "",
-        image: "",
-    });
-    const [editingId, setEditingId] = useState(null);
-    const manageProductsRef = useRef(null);
-
-    useEffect(() => {
-        const load = async () => {
-            try {
-                const res = await fetch(`${API_BASE}/products`);
-                const data = await res.json();
-                setProducts(data || []);
-            } catch (err) {
-                console.error("Load products", err);
-            }
-        };
-        load();
-    }, []);
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
-    };
-
-    const handleImageChange = (e) => {
-        const file = e.target.files?.[0];
-
-        if (!file) {
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setFormData((prev) => ({ ...prev, image: reader.result }));
-        };
-        reader.readAsDataURL(file);
-    };
-
-    const resetForm = () => {
-        setFormData({ name: "", price: "", category: "Footwear", quantity: "", image: "" });
-        setEditingId(null);
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (!formData.name || !formData.price) {
-            return;
-        }
-
-        const payload = {
-            name: formData.name,
-            price: Number(formData.price),
-            category: formData.category,
-            quantity: Number(formData.quantity || 0),
-            image: formData.image,
-        };
-
-        try {
-            if (editingId) {
-                const res = await fetch(`${API_BASE}/products/${editingId}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
-                });
-                const json = await res.json();
-                setProducts((prev) => prev.map((product) => ((product._id || product.id) === editingId ? json.product : product)));
-            } else {
-                const res = await fetch(`${API_BASE}/products`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
-                });
-                const json = await res.json();
-                setProducts((prev) => [json.product, ...prev]);
-            }
-            resetForm();
-        } catch (err) {
-            console.error("Save product", err);
-        }
-    };
-
-    const handleEdit = (product) => {
-        setEditingId(product._id || product.id);
-        setFormData({
-            name: product.name,
-            price: product.price,
-            category: product.category,
-            quantity: product.quantity ?? "",
-            image: product.image ?? "",
-        });
-        manageProductsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    };
-
-    const handleDelete = async (id) => {
-        try {
-            await fetch(`${API_BASE}/products/${id}`, { method: "DELETE" });
-            setProducts((prev) => prev.filter((product) => (product._id || product.id) !== id));
-            if (editingId === id) {
-                resetForm();
-            }
-        } catch (err) {
-            console.error("Delete product", err);
-        }
-    };
-
-    const handleQuickAction = (action) => {
-        manageProductsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-
-        if (action === "add") {
-            resetForm();
-        }
-
-        if (action === "edit" && products.length > 0) {
-            handleEdit(products[0]);
-        }
-    };
-
-    return (
-        <div className="dashboard-container">
-            <div className="dashboard-header">
-                <div>
-                    <h2>Dashboard</h2>
-                    <p>Welcome back, Admin User!</p>
-                </div>
-            </div>
-
-            <div className="dashboard-cards">
-                <div className="card">
-                    <div className="card-icon">📦</div>
-                    <div className="card-content">
-                        <h4>Total Products</h4>
-                        <h2>{products.length}</h2>
-                    </div>
-                </div>
-                <div className="card">
-                    <div className="card-icon">🛒</div>
-                    <div className="card-content">
-                        <h4>Total Orders</h4>
-                        <h2>1245</h2>
-                    </div>
-                </div>
-                <div className="card">
-                    <div className="card-icon">👥</div>
-                    <div className="card-content">
-                        <h4>Total Users</h4>
-                        <h2>2856</h2>
-                    </div>
-                </div>
-                <div className="card">
-                    <div className="card-icon">💰</div>
-                    <div className="card-content">
-                        <h4>Total Revenue</h4>
-                        <h2>$24,680</h2>
-                    </div>
-                </div>
-            </div>
-
-            <div className="dashboard-main">
-                <div className="dashboard-orders">
-                    <h2>Recent order</h2>
-                    <NavLink to="/admin/order">View all orders</NavLink>
-                    <ManageOrder orders={orders} />
-                </div>
-
-                <div className="quick-actions">
-                    <h3>Quick Actions</h3>
-                    <div className="action-grid">
-                        <button type="button" className="quick-action-btn" onClick={() => handleQuickAction("add")}>Add Product</button>
-                        <button type="button" className="quick-action-btn" onClick={() => handleQuickAction("manage")}>Manage Products</button>
-                        <button type="button" className="quick-action-btn" onClick={() => handleQuickAction("edit")}>Edit Products</button>
-                        <button type="button" className="quick-action-btn"><NavLink to="/admin/payment">Payment Method</NavLink></button>
-                    </div>
-                </div>
-
-                <div className="dashboard-manage-products" ref={manageProductsRef}>
-                    <div className="admin-product-container">
-                        <div className="admin-product-header">
-                            <div>
-                                <h2>Manage Products</h2>
-                                <p>Manage products directly from the dashboard.</p>
-                            </div>
-                            <span className="admin-product-badge">{products.length} products</span>
-                        </div>
-
-                        <div className="admin-product-grid">
-                            <form className="admin-product-form" onSubmit={handleSubmit}>
-                                <h3>{editingId ? "Edit Product" : "Add New Product"}</h3>
-
-                                <label>
-                                    Product Name
-                                    <input
-                                        type="text"
-                                        name="name"
-                                        value={formData.name}
-                                        onChange={handleChange}
-                                        placeholder="Enter product name"
-                                    />
-                                </label>
-
-                                <label>
-                                    Price
-                                    <input
-                                        type="number"
-                                        name="price"
-                                        value={formData.price}
-                                        onChange={handleChange}
-                                        step="0.01"
-                                        placeholder="0.00"
-                                    />
-                                </label>
-
-                                <label>
-                                    Category
-                                    <select name="category" value={formData.category} onChange={handleChange}>
-                                        <option value="Footwear">Footwear</option>
-                                        <option value="Electronics">Electronics</option>
-                                        <option value="Clothing">Clothing</option>
-                                        <option value="Home">Home</option>
-                                        <option value="Mobile">Mobile</option>
-                                    </select>
-                                </label>
-                                
-                                <label>
-                                    Quantity
-                                    <input type="number" name="quantity" value={formData.quantity} onChange={handleChange} placeholder="Enter quantity" />
-                                </label>
-
-                                <label>
-                                    Product Image
-                                    <input type="file" accept="image/*" onChange={handleImageChange} />
-                                </label>
-
-                                {formData.image ? (
-                                    <img
-                                        src={formData.image}
-                                        alt="Preview"
-                                        style={{ width: "100%", maxHeight: "140px", objectFit: "cover", borderRadius: "8px", marginTop: "8px" }}
-                                    />
-                                ) : null}
-
-                                <div className="admin-product-actions">
-                                    <button type="submit" className="primary-btn">
-                                        {editingId ? "Save Changes" : "Add Product"}
-                                    </button>
-                                    {editingId ? (
-                                        <button type="button" className="secondary-btn" onClick={resetForm}>
-                                            Cancel
-                                        </button>
-                                    ) : null}
-                                </div>
-                            </form>
-
-                            <div className="admin-product-list">
-                                <div className="admin-product-list-header">
-                                    <h3>Product List</h3>
-                                    <p>Manage your catalog from the dashboard.</p>
-                                </div>
-
-                                {products.map((product) => (
-                                    <div key={product._id || product.id} className="admin-product-item">
-                                        <div className="admin-product-item-info">
-                                            {product.image ? (
-                                                <img
-                                                    src={product.image}
-                                                    alt={product.name}
-                                                    className="admin-product-thumb"
-                                                    style={{ objectFit: "cover" }}
-                                                />
-                                            ) : (
-                                                <div className="admin-product-thumb">{product.name.charAt(0)}</div>
-                                            )}
-                                            <div>
-                                                <h4>{product.name}</h4>
-                                                <p>{product.category}</p>
-                                                <p>Quantity: {product.quantity ?? 0}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="admin-product-item-actions">
-                                            <button type="button" className="secondary-btn" onClick={() => handleEdit(product)}>
-                                                Edit
-                                            </button>
-                                            <button type="button" className="danger-btn" onClick={() => handleDelete(product._id || product.id)}>
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-export default Dashboard;

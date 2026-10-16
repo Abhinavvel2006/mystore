@@ -1,211 +1,211 @@
 .admin-payment-container {
-    padding: 30px 24px;
-    background: #f5f7fb;
-    width: 100%;
-    box-sizing: border-box;
+  padding: 30px 24px;
+  background: #f5f7fb;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .admin-payment-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .admin-payment-header h2 {
-    margin: 0 0 6px;
-    font-size: 22px;
-    color: #111827;
+  margin: 0 0 6px;
+  font-size: 22px;
+  color: #111827;
 }
 
 .admin-payment-header p {
-    margin: 0;
-    color: #6b7280;
+  margin: 0;
+  color: #6b7280;
 }
 
 .admin-payment-btn,
 .admin-payment-panel-header button {
-    border: none;
-    border-radius: 8px;
-    background: #2563eb;
-    color: white;
-    padding: 8px 12px;
-    font-size: 13px;
-    cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
 }
 
 .admin-payment-summary {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
-    margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
 }
 
 .admin-payment-card {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
 }
 
 .admin-payment-card.highlight {
-    background: linear-gradient(135deg, #2563eb, #3b82f6);
-    color: white;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: white;
 }
 
 .admin-payment-card span {
-    display: block;
-    font-size: 13px;
-    margin-bottom: 6px;
-    opacity: 0.8;
+  display: block;
+  font-size: 13px;
+  margin-bottom: 6px;
+  opacity: 0.8;
 }
 
 .admin-payment-card h3 {
-    margin: 0 0 6px;
-    font-size: 22px;
+  margin: 0 0 6px;
+  font-size: 22px;
 }
 
 .admin-payment-card p {
-    margin: 0;
-    font-size: 13px;
+  margin: 0;
+  font-size: 13px;
 }
 
 .admin-payment-grid {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 16px;
-    margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .admin-payment-panel {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
 }
 
 .admin-payment-panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
 }
 
 .admin-payment-panel-header h3 {
-    margin: 0;
-    font-size: 16px;
-    color: #111827;
+  margin: 0;
+  font-size: 16px;
+  color: #111827;
 }
 
 .payment-method-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .payment-method-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    background: #f9fafb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f9fafb;
 }
 
 .payment-method-item h4 {
-    margin: 0 0 4px;
-    font-size: 14px;
-    color: #111827;
+  margin: 0 0 4px;
+  font-size: 14px;
+  color: #111827;
 }
 
 .payment-method-item p {
-    margin: 0;
-    font-size: 12px;
-    color: #6b7280;
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
 }
 
 .payment-method-status {
-    padding: 6px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .payment-method-status.active {
-    background: #dcfce7;
-    color: #166534;
+  background: #dcfce7;
+  color: #166534;
 }
 
 .payment-method-status.paused {
-    background: #fef3c7;
-    color: #92400e;
+  background: #fef3c7;
+  color: #92400e;
 }
 
 .credit-overview {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
 .credit-box {
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    padding: 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px;
 }
 
 .credit-box.full {
-    grid-column: 1 / -1;
+  grid-column: 1 / -1;
 }
 
 .credit-box h4 {
-    margin: 0 0 6px;
-    font-size: 13px;
-    color: #6b7280;
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: #6b7280;
 }
 
 .credit-box p {
-    margin: 0;
-    color: #111827;
-    font-size: 16px;
-    font-weight: 700;
+  margin: 0;
+  color: #111827;
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .expenses-table {
-    width: 100%;
-    border-collapse: collapse;
+  width: 100%;
+  border-collapse: collapse;
 }
 
 .expenses-table th,
 .expenses-table td {
-    text-align: left;
-    padding: 10px 8px;
-    border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .expenses-table th {
-    font-size: 12px;
-    color: #6b7280;
-    text-transform: uppercase;
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
 }
 
 .expenses-table td {
-    font-size: 14px;
-    color: #111827;
+  font-size: 14px;
+  color: #111827;
 }
 
 @media (max-width: 900px) {
-    .admin-payment-summary,
-    .admin-payment-grid {
-        grid-template-columns: 1fr;
-    }
+  .admin-payment-summary,
+  .admin-payment-grid {
+    grid-template-columns: 1fr;
+  }
 
-    .admin-payment-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+  .admin-payment-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

@@ -1,15 +1,193 @@
-.admin-layout{
-    display:flex;
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f6f1;
 }
 
-.admin-main{
-    margin-left:200px;
-    width:calc(100% - 200px);
-    min-height:100vh;
-    background:#f5f7fb;
+.admin-main {
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  min-height: 100vh;
+  background: #f5f6f1;
 }
 
-.admin-content{
-    margin-top:56px;
-    padding:25px;
+.admin-content {
+  padding: 30px;
+  margin-top: 74px;
+}
+
+@media (max-width: 800px) {
+  .admin-main {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .admin-content {
+    margin-top: 64px;
+    padding: 16px;
+  }
+}
+
+/* Shared visual language for every management screen. */
+.admin-content .admin-product-container,
+.admin-content .admin-order-container,
+.admin-content .admin-categories-container,
+.admin-content .admin-payment-container {
+  padding: 0;
+  background: transparent;
+}
+
+.admin-content .admin-product-header h2,
+.admin-content .admin-order-header h2,
+.admin-content .admin-categories-header h2,
+.admin-content .admin-payment-header h2,
+.admin-content .admin-settings h2,
+.admin-content .admin-notifications-header h2 {
+  font-family: "Playfair Display", Georgia, serif;
+  color: #1c3934;
+  font-size: 30px;
+  letter-spacing: -0.03em;
+}
+
+.admin-content .admin-product-header p,
+.admin-content .admin-order-header p,
+.admin-content .admin-categories-header p,
+.admin-content .admin-payment-header p,
+.admin-content .admin-notifications-header p {
+  color: #74817a;
+}
+
+.admin-content .admin-product-badge,
+.admin-content .admin-order-badge,
+.admin-content .admin-categories-badge {
+  background: #e5eee1;
+  color: #2d5b50;
+  border-radius: 20px;
+}
+
+.admin-content .admin-product-form,
+.admin-content .admin-product-list,
+.admin-content .admin-categories-form,
+.admin-content .admin-categories-list,
+.admin-content .admin-order-card,
+.admin-content .admin-order-item,
+.admin-content .admin-payment-card,
+.admin-content .admin-payment-panel,
+.admin-content .summary-card,
+.admin-content .notification-item,
+.admin-content .panel,
+.admin-content .account-card,
+.admin-content .stocks-card {
+  background: #fffdf9;
+  border-color: #e5e2d9;
+  border-radius: 11px;
+  box-shadow: 0 5px 16px rgba(28, 57, 52, 0.04);
+}
+
+.admin-content .admin-product-form h3,
+.admin-content .admin-product-list h3,
+.admin-content .admin-categories-form h3,
+.admin-content .admin-categories-list h3,
+.admin-content .admin-payment-panel h3,
+.admin-content .notification-content h3 {
+  color: #1c3934;
+}
+
+.admin-content .admin-product-form label,
+.admin-content .admin-categories-form label {
+  color: #42564f;
+}
+
+.admin-content .admin-product-form input,
+.admin-content .admin-product-form select,
+.admin-content .admin-categories-form input,
+.admin-content .admin-categories-form textarea,
+.admin-content .credit-row input {
+  border-color: #dcd9cf;
+  background: #fffdf9;
+}
+
+.admin-content .admin-product-form input:focus,
+.admin-content .admin-product-form select:focus,
+.admin-content .admin-categories-form input:focus,
+.admin-content .admin-categories-form textarea:focus {
+  border-color: #6d9a86;
+  box-shadow: 0 0 0 2px rgba(109, 154, 134, 0.14);
+}
+
+.admin-content .primary-btn,
+.admin-content .admin-payment-btn,
+.admin-content .admin-payment-panel-header button,
+.admin-content .credit-row .primary {
+  background: #173b35;
+  border-radius: 6px;
+}
+
+.admin-content .primary-btn:hover,
+.admin-content .admin-payment-btn:hover,
+.admin-content .admin-payment-panel-header button:hover {
+  background: #28564d;
+}
+
+.admin-content .secondary-btn {
+  background: #edf1ea;
+  color: #31564d;
+  border-radius: 6px;
+}
+
+.admin-content .danger-btn {
+  background: #f8e6df;
+  color: #a6452e;
+  border-radius: 6px;
+}
+
+.admin-content .admin-product-item,
+.admin-content .admin-category-item,
+.admin-content .payment-method-item {
+  border-color: #e9e5db;
+  background: #faf9f5;
+}
+
+.admin-content .admin-product-thumb,
+.admin-content .admin-category-icon {
+  border-radius: 9px;
+  background: #e5eee1;
+  color: #386056;
+}
+
+.admin-content .admin-payment-card.highlight {
+  background: linear-gradient(130deg, #173b35, #2c6658);
+}
+
+.admin-content .notification-item.info {
+  border-left-color: #497d70;
+}
+
+.admin-content .notification-item.warning {
+  border-left-color: #d19445;
+}
+
+.admin-content .notification-item.danger {
+  border-left-color: #b85834;
+}
+
+.admin-content .notification-back-link,
+.admin-content .notification-link,
+.admin-content .link {
+  color: #b85834;
+}
+
+.admin-content .toggle-btn.active {
+  background: #173b35;
+  border-color: #173b35;
+}
+
+.admin-content .admin-settings {
+  padding: 0;
+  max-width: none;
+  color: #293d38;
+}
+
+.admin-content .avatar {
+  background: linear-gradient(135deg, #173b35, #6d9a86);
 }

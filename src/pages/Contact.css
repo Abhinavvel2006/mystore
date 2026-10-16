@@ -1,145 +1,144 @@
 .contact-page {
-    padding: 48px 20px;
-    background: #f4f6f8;
+  padding: 48px 20px;
+  background: #f4f6f8;
 }
 
 .contact-container {
-    max-width: 760px;
-    margin: 0 auto;
-    width: 100%;
-    background: #ffffff;
-    padding: 40px;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  max-width: 760px;
+  margin: 0 auto;
+  width: 100%;
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
 .contact-header {
-    text-align: center;
-    margin-bottom: 24px;
+  text-align: center;
+  margin-bottom: 24px;
 }
 
 .contact-header h1 {
-    margin: 0 0 10px;
-    font-size: 32px;
-    color: #1f2933;
+  margin: 0 0 10px;
+  font-size: 32px;
+  color: #1f2933;
 }
 
 .contact-header p {
-    margin: 0;
-    color: #52606d;
-    font-size: 16px;
+  margin: 0;
+  color: #52606d;
+  font-size: 16px;
 }
 
 .contact-info {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-bottom: 28px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
 }
 
 .info-box {
-    background: #f8fafc;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 18px;
-    text-align: center;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px;
+  text-align: center;
 }
 
 .info-box h3 {
-    margin: 0 0 8px;
-    font-size: 18px;
-    color: #111827;
+  margin: 0 0 8px;
+  font-size: 18px;
+  color: #111827;
 }
 
 .info-box p {
-    margin: 0;
-    color: #4b5563;
-    font-size: 15px;
+  margin: 0;
+  color: #4b5563;
+  font-size: 15px;
 }
 
 .contact-form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .contact-form h2 {
-    margin: 0 0 8px;
-    color: #1f2933;
+  margin: 0 0 8px;
+  color: #1f2933;
 }
 
 .contact-form label {
-    font-size: 14px;
-    font-weight: 600;
-    color: #374151;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
 }
 
 .contact-form input,
 .contact-form textarea {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid #d1d5db;
-    border-radius: 10px;
-    font-size: 15px;
-    outline: none;
-    transition: border-color 0.2s ease;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s ease;
 }
 
 .contact-form input:focus,
 .contact-form textarea:focus {
-    border-color: #2563eb;
+  border-color: #2563eb;
 }
 
 .contact-form textarea {
-    resize: vertical;
-    min-height: 120px;
+  resize: vertical;
+  min-height: 120px;
 }
 
 .contact-btn {
-    margin-top: 8px;
-    padding: 12px 18px;
-    border: none;
-    border-radius: 10px;
-    background: #2563eb;
-    color: #ffffff;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
+  margin-top: 8px;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 10px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .contact-btn:hover {
-    background: #1d4ed8;
+  background: #1d4ed8;
 }
 
 .contact-btn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .contact-status {
-    margin: 0;
-    padding: 10px 12px;
-    border-radius: 8px;
-    font-size: 14px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
 }
 
 .contact-status.success {
-    background: #ecfdf3;
-    color: #047857;
+  background: #ecfdf3;
+  color: #047857;
 }
 
 .contact-status.error {
-    background: #fef2f2;
-    color: #b91c1c;
+  background: #fef2f2;
+  color: #b91c1c;
 }
 /* mobile responsive */
-@media (max-width:768px){
+@media (max-width: 768px) {
+  .contact-info {
+    grid-template-columns: 1fr;
+  }
 
-    .contact-info{
-        grid-template-columns:1fr;
-    }
-
-    .contact-container{
-        padding:20px;
-    }
+  .contact-container {
+    padding: 20px;
+  }
 }

@@ -1,139 +1,135 @@
-.adminheader-container{
-    position: fixed;
-    top: 0;
-    left: 200px;
-    right: 0;
-    height: 56px;
-    padding: 0 20px;
-    background: #f8fbff;
-    border-bottom: 1px solid #23406b;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-sizing: border-box;
+.adminheader-container {
+  position: fixed;
+  top: 0;
+  left: 250px;
+  right: 0;
+  height: 74px;
+  padding: 0 30px;
+  background: rgba(255, 253, 249, 0.94);
+  border-bottom: 1px solid #e6e4dc;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  backdrop-filter: blur(12px);
 }
-
 .adminheader-left,
 .adminheader-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
 }
-
-.admin-menu-toggle,
+.adminheader-left:after {
+  content: "Store management";
+  color: #718078;
+  font-size: 13px;
+  font-weight: 600;
+}
+.admin-menu-toggle {
+  display: none;
+}
 .header-icon-btn {
-    width: 38px;
-    height: 38px;
-    color: #123b6a;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    border-radius: 8px;
+  height: 38px;
+  width: 38px;
+  border: 1px solid #e4e0d7;
+  background: #fffdf9;
+  border-radius: 50%;
+  color: #24463f;
+  cursor: pointer;
 }
-
-.admin-menu-toggle:hover,
-.header-icon-btn:hover {
-    background: #eef4ff;
-}
-
-.admin-profile-wrapper {
-    position: relative;
-}
-
-.admin-profile {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 10px;
-    border: none;
-    background: transparent;
-    color: #123b6a;
-    cursor: pointer;
-    border-radius: 10px;
-}
-
+.header-icon-btn:hover,
 .admin-profile:hover {
-    background: #eef4ff;
+  background: #edf2ea;
 }
-
-.admin-profile-details {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    line-height: 1.1;
+.admin-profile-wrapper {
+  position: relative;
 }
-
+.admin-profile {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #24463f;
+  cursor: pointer;
+}
 .admin-profile-avatar {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #123b6a, #2563eb);
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
+  display: grid;
+  place-items: center;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: #b85834;
+  color: #fff;
+  font-weight: 700;
 }
-
+.admin-profile-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.18;
+}
 .admin-profile-name {
-    font-size: 0.9rem;
-    color: #123b6a;
-    font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
 }
-
 .admin-profile-role {
-    font-size: 0.7rem;
-    color: #56769a;
-    font-weight: 600;
+  font-size: 10px;
+  color: #7c8980;
 }
-
 .profile-chevron {
-    font-size: 0.75rem;
-    transition: transform 0.2s ease;
+  font-size: 11px;
+  transition: 0.2s;
 }
-
 .profile-chevron.open {
-    transform: rotate(180deg);
+  transform: rotate(180deg);
 }
-
 .admin-profile-menu {
-    position: absolute;
-    top: calc(100% + 6px);
-    right: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 160px;
-    padding: 6px;
-    border: 1px solid #dce6f2;
-    border-radius: 10px;
-    background: #ffffff;
-    box-shadow: 0 8px 20px rgba(18, 59, 106, 0.12);
-    z-index: 20;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 155px;
+  padding: 6px;
+  border: 1px solid #e3dfd5;
+  border-radius: 8px;
+  background: #fffdf9;
+  box-shadow: 0 12px 28px rgba(24, 57, 52, 0.14);
 }
-
 .profile-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    padding: 8px 10px;
-    border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: #123b6a;
-    cursor: pointer;
-    text-align: left;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  border-radius: 5px;
+  padding: 9px;
+  text-align: left;
+  cursor: pointer;
 }
-
 .profile-menu-item:hover {
-    background: #f2f6fb;
+  background: #f3eee5;
 }
-
 .profile-menu-item.logout {
-    color: #c0392b;
+  color: #b34c32;
+}
+@media (max-width: 800px) {
+  .adminheader-container {
+    left: 0;
+    height: 64px;
+    padding: 0 16px;
+  }
+  .admin-menu-toggle {
+    display: block;
+    border: 0;
+    background: transparent;
+    color: #24463f;
+    font-size: 19px;
+  }
+  .adminheader-left:after {
+    content: "Admin workspace";
+  }
+  .admin-profile-details,
+  .profile-chevron {
+    display: none;
+  }
 }

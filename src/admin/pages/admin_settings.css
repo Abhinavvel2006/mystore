@@ -1,184 +1,242 @@
 .admin-settings {
-	padding: 20px;
-	max-width: 1100px;
-	margin: 0 auto;
-	color: #222;
+  padding: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+  color: #222;
 }
 
 .admin-settings h2 {
-	margin-bottom: 18px;
+  margin-bottom: 18px;
 }
 
 .admin-settings-grid {
-	display: grid;
-	grid-template-columns: 320px 1fr;
-	gap: 20px;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
 }
-.panel{
-	background: #fff;
-	border: 1px solid #eee;
-	padding: 16px;
-	border-radius: 10px;
+.panel {
+  background: #fff;
+  border: 1px solid #eee;
+  padding: 16px;
+  border-radius: 10px;
 }
 
 .profile-panel {
-	display: flex;
-	flex-direction: column;
-	gap: 12px;
-	align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
 }
 
 .avatar {
-	width: 72px;
-	height: 72px;
-	border-radius: 12px;
-	background: linear-gradient(135deg,#4f46e5,#06b6d4);
-	color: #fff;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-weight: 700;
-	font-size: 20px;
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #4f46e5, #06b6d4);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 20px;
 }
 
 .profile-info h3 {
-	margin: 0;
+  margin: 0;
 }
 
-.panel-block{
-	padding-top: 8px;
-	border-top: 1px solid #f3f4f6;
+.panel-block {
+  padding-top: 8px;
+  border-top: 1px solid #f3f4f6;
 }
 
 .pinned-section {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .section-title {
-	font-size: 13px;
-	font-weight: 600;
-	color: #4b5563;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5563;
 }
 
 .toggle-row {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .toggle-label {
-	font-size: 14px;
-	color: #374151;
+  font-size: 14px;
+  color: #374151;
 }
 
 .toggle-btn {
-	padding: 6px 12px;
-	border: 1px solid #d1d5db;
-	border-radius: 999px;
-	background: #f9fafb;
-	color: #111827;
-	cursor: pointer;
-	font-weight: 600;
-	transition: all 0.2s ease;
+  padding: 6px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  background: #f9fafb;
+  color: #111827;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
 
 .toggle-btn.active {
-	background: #2563eb;
-	color: #fff;
-	border-color: #2563eb;
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
 }
 
-.label { 
-	font-size: 13px; 
-	color: #6b7280; 
+.label {
+  font-size: 13px;
+  color: #6b7280;
 }
 
-.balance.big { 
-	font-size: 20px;
-	font-weight: 700; 
-	margin-top: 6px; 
+.balance.big {
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 6px;
 }
 
-.quick-buttons { display:flex; gap:8px; margin-top:8px; }
-.quick-buttons button { padding:6px 10px; border-radius:6px; border:1px solid #e6eef8; background:#f1f5f9; cursor:pointer }
+.quick-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.quick-buttons button {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #e6eef8;
+  background: #f1f5f9;
+  cursor: pointer;
+}
 
 .main-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    width: 100%;
-    padding: 0;
-    border-radius: 0;
-    background: transparent;
-    border: none;
-    box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
-.settings-stocks-card { background: transparent; border: none; padding: 0; }
-
-.account-card, .stocks-card {
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    padding: 12px 14px;
-    border-radius: 10px;
-    box-shadow: none;
+.settings-stocks-card {
+  background: transparent;
+  border: none;
+  padding: 0;
 }
 
-.settings-card h3, .settings-stocks-card h3 {
-    margin: 0 0 6px;
-    font-size: 15px;
+.account-card,
+.stocks-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  padding: 12px 14px;
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+.settings-card h3,
+.settings-stocks-card h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
 }
 
 .section-desc {
-    margin: 0 0 8px;
-    font-size: 13px;
-    color: #6b7280;
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: #6b7280;
 }
 
-.credit-row { display:flex; gap:8px; margin-top:8px }
+.credit-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
 .credit-row input {
-    flex:1;
-    padding:8px 10px;
-    border:1px solid #d1d5db;
-    border-radius:8px;
-    background:#fff;
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
 }
 .credit-row .primary {
-    padding:8px 12px;
-    background:#2563eb;
-    color:white;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
+  padding: 8px 12px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
-.help-row { margin-top:8px }
-.link { color:#2563eb }
+.help-row {
+  margin-top: 8px;
+}
+.link {
+  color: #2563eb;
+}
 
-.stocks-list { list-style:none; padding:0; margin:0 }
+.stocks-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
 .stock-item {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:8px 0;
-    border-bottom:1px solid #f3f4f6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
 }
-.stock-left .stock-name { font-weight:600 }
-.stock-controls { display: flex; align-items: center; gap: 8px; }
-.small { width:30px; height:30px; border-radius:6px; border:1px solid #e6eef8; background:#fff; cursor:pointer }
-.qty { min-width:40px; text-align:center; display:inline-block }
+.stock-left .stock-name {
+  font-weight: 600;
+}
+.stock-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.small {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid #e6eef8;
+  background: #fff;
+  cursor: pointer;
+}
+.qty {
+  min-width: 40px;
+  text-align: center;
+  display: inline-block;
+}
 
-:root.dark-theme, :root.dark-theme body, .dark-theme { background:#0b1220; color:#dbeafe }
-.dark-theme .panel { background:#0f1724; border-color:#111827 }
-.dark-theme .main-panel {
-    background: transparent;
-    border: none;
-    box-shadow: none;
+:root.dark-theme,
+:root.dark-theme body,
+.dark-theme {
+  background: #0b1220;
+  color: #dbeafe;
 }
-.dark-theme .account-card, .dark-theme .stocks-card { background:#111827; border-color:#1f2937; box-shadow: none; }
+.dark-theme .panel {
+  background: #0f1724;
+  border-color: #111827;
+}
+.dark-theme .main-panel {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+.dark-theme .account-card,
+.dark-theme .stocks-card {
+  background: #111827;
+  border-color: #1f2937;
+  box-shadow: none;
+}
 .dark-theme .admin-settings h2,
 .dark-theme .profile-info h3,
 .dark-theme .section-title,
@@ -188,14 +246,27 @@
 .dark-theme .qty,
 .dark-theme .muted,
 .dark-theme .label {
-	color: #ffffff;
+  color: #ffffff;
 }
-.dark-theme .toggle-btn { background:#111827; color:#dbeafe; border-color:#374151 }
-.dark-theme .toggle-btn.active { background:#3b82f6; color:#fff; border-color:#3b82f6 }
-.dark-theme .section-desc { color:#cbd5e1; }
-.dark-theme .link { color:#93c5fd; }
+.dark-theme .toggle-btn {
+  background: #111827;
+  color: #dbeafe;
+  border-color: #374151;
+}
+.dark-theme .toggle-btn.active {
+  background: #3b82f6;
+  color: #fff;
+  border-color: #3b82f6;
+}
+.dark-theme .section-desc {
+  color: #cbd5e1;
+}
+.dark-theme .link {
+  color: #93c5fd;
+}
 
 @media (max-width: 900px) {
-	.admin-settings-grid { grid-template-columns: 1fr }
+  .admin-settings-grid {
+    grid-template-columns: 1fr;
+  }
 }
-

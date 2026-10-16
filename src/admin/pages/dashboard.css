@@ -1,188 +1,179 @@
 .dashboard-container {
-    padding: 30px 24px;
-    background: #f5f7fb;
-    width: 100%;
-    box-sizing: border-box;
+  width: 100%;
+  color: #293d38;
 }
-
 .dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding: 0 4px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 28px;
 }
-
+.admin-kicker {
+  margin: 0 0 7px !important;
+  color: #b85834 !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
 .dashboard-header h2 {
-    margin: 0;
-    font-size: 24px;
-    color: #1f2937;
+  font-family: "Playfair Display", Georgia, serif;
+  color: #1c3934;
+  font-size: 32px;
+  letter-spacing: -0.03em;
+  margin: 0;
 }
-
 .dashboard-header p {
-    margin: 4px 0 0;
-    color: #6b7280;
-    font-size: 14px;
+  margin: 6px 0 0;
+  color: #76837d;
+  font-size: 14px;
 }
-
+.dashboard-add-btn {
+  border: 0;
+  border-radius: 7px;
+  background: #173b35;
+  color: #fff;
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.dashboard-add-btn:hover {
+  background: #28564d;
+}
 .dashboard-cards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    margin-bottom: 20px;
-    align-items: stretch;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
 }
-
 .card {
-    background: white;
-    border-radius: 12px;
-    padding: 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    flex: 1 1 180px;
-    min-width: 180px;
-    max-width: calc(25% - 12px);
+  padding: 18px;
+  border: 1px solid #e6e3da;
+  border-radius: 12px;
+  background: #fffdf9;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  box-shadow: 0 4px 14px rgba(28, 57, 52, 0.035);
 }
-
 .card-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 10px;
-    background: #eef4ff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 22px;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 9px;
+  background: #e7efe3;
+  font-size: 19px;
 }
-
 .card-content h4 {
-    margin: 0;
-    color: #6b7280;
-    font-size: 13px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #7b8780;
+  margin: 0;
 }
-
 .card-content h2 {
-    margin: 4px 0 0;
-    font-size: 20px;
-    color: #1f2937;
+  font-size: 23px;
+  color: #1c3934;
+  margin: 4px 0 0;
 }
-
 .dashboard-main {
-    display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
-    gap: 20px;
-    align-items: start;
-    margin-top: 8px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 20px;
 }
-
 .dashboard-orders,
 .quick-actions {
-    background: white;
-    border-radius: 12px;
-    padding: 18px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    min-width: 0;
+  padding: 22px;
+  border: 1px solid #e6e3da;
+  border-radius: 12px;
+  background: #fffdf9;
 }
-
-.dashboard-manage-products {
-    grid-column: 1 / -1;
-    margin-top: 8px;
+.dashboard-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
 }
-
 .dashboard-orders h2,
 .quick-actions h3 {
-    margin: 0 0 12px;
-    color: #1f2937;
-    font-size: 18px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 21px;
+  color: #1c3934;
+  margin: 0 0 15px;
 }
-
-.action-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+.dashboard-panel-heading > a {
+  font-size: 12px;
+  color: #b85834;
+  font-weight: 700;
+  text-decoration: none;
 }
-
-.action-grid button,
-.quick-action-btn {
-    padding: 10px 12px;
-    border: none;
-    border-radius: 8px;
-    background: #2563eb;
-    color: white;
-    font-size: 13px;
-    cursor: pointer;
-}
-
-.action-grid button:hover,
-.quick-action-btn:hover {
-    background: #1d4ed8;
-}
-
-.action-grid a {
-    text-decoration: none;
-    color: white;
-}
-
 .manage-order {
-    margin-top: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  margin-top: 14px;
 }
-
 .empty-state {
-    padding: 16px;
-    border: 1px dashed #d1d5db;
-    border-radius: 8px;
-    text-align: center;
-    background: #fafafa;
+  padding: 28px;
+  border: 1px dashed #c9d6c5;
+  border-radius: 8px;
+  background: #f5f8f2;
+  text-align: center;
+  color: #738179;
 }
-
 .empty-state p {
-    margin: 0 0 8px;
-    color: #6b7280;
-    font-size: 14px;
+  margin: 0;
 }
-
-.empty-state button {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 6px;
-    background: #2563eb;
-    color: white;
-    cursor: pointer;
+.action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
-
+.quick-action-btn {
+  border: 1px solid #dce5d8;
+  border-radius: 7px;
+  background: #f3f7f1;
+  color: #254a42;
+  padding: 13px 10px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+}
+.quick-action-btn:hover {
+  background: #dcebdd;
+}
+.quick-action-btn a {
+  color: inherit;
+  text-decoration: none;
+}
+.dashboard-manage-products {
+  grid-column: 1/-1;
+}
 .order-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    background: #f9fafb;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  padding: 11px;
+  border: 1px solid #e6e3da;
+  border-radius: 7px;
+  background: #f9f8f4;
 }
-
-@media (max-width: 768px) {
-    .dashboard-container {
-        padding: 16px;
-    }
-
-    .dashboard-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-
-    .dashboard-main {
-        flex-direction: column;
-    }
-
-    .card {
-        max-width: 100%;
-        min-width: 100%;
-    }
+@media (max-width: 1000px) {
+  .dashboard-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 700px) {
+  .dashboard-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .dashboard-cards,
+  .dashboard-main {
+    grid-template-columns: 1fr;
+  }
+  .action-grid {
+    grid-template-columns: 1fr;
+  }
 }
