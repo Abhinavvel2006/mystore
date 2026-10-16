@@ -35,6 +35,41 @@
   max-height: 44px;
 }
 
+.delivery-location {
+  display: flex;
+  flex: 0 1 210px;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 150px;
+  color: #173b35;
+}
+
+.delivery-location span {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.delivery-location span svg {
+  margin-right: 5px;
+}
+
+.delivery-location input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #dfdbd0;
+  border-radius: 6px;
+  padding: 7px 9px;
+  background: #fff;
+  color: #1b2538;
+  font: inherit;
+  font-size: 12px;
+}
+
+.delivery-location input:focus {
+  outline: 2px solid #b6b09f;
+  outline-offset: 1px;
+}
+
 .store-search {
   height: 44px;
   display: flex;
@@ -138,6 +173,11 @@
     width: 100%;
   }
 
+  .delivery-location {
+    order: 4;
+    flex: 1 1 100%;
+  }
+
   .menu-toggle {
     display: block;
     margin-left: auto;
@@ -145,7 +185,7 @@
 
   .header-actions {
     display: none;
-    order: 4;
+    order: 5;
     width: 100%;
     margin: 0;
     padding: 12px 0 4px;
@@ -189,5 +229,9 @@
 
   .brand img {
     width: 112px;
+  }
+
+  .delivery-location {
+    min-width: 100%;
   }
 }

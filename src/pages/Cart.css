@@ -214,7 +214,85 @@
 
 .checkout-btn:disabled {
   opacity: 0.7;
-  cursor: wait;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.cart-quantity-controls button:disabled,
+.cart-remove button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.checkout-note,
+.checkout-methods p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.checkout-methods {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.checkout-methods h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.checkout-method-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.checkout-method-list li {
+  padding: 5px 9px;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.checkout-retry {
+  padding: 7px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #1d4ed8;
+  background: #fff;
+  cursor: pointer;
+}
+
+.checkout-btn:focus-visible,
+.checkout-retry:focus-visible,
+.cart-quantity-controls button:focus-visible,
+.cart-remove button:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 3px;
+}
+
+.cart-payment-status {
+  font-size: 12px;
+  color: #92400e;
+  text-align: right;
+}
+
+.cart-payment-status.is-paid {
+  color: #166534;
+}
+
+.cart-order-item .cart-order-status {
+  margin-top: 5px;
+  font-size: 12px;
 }
 
 .cart-message {

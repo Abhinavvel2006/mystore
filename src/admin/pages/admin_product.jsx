@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { EmptyState, Icon, Metric, PageHeading } from "../components/Workspace";
+import formatCurrency from "../../currency";
 
 export default function AdminProduct() {
   const [params, setParams] = useSearchParams();
@@ -14,6 +15,10 @@ export default function AdminProduct() {
   const [notice, setNotice] = useState("");
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [revision, setRevision] = useState(0);
+  const requestPending = useRef(true);
+  const catalogueInitialized = useRef(false);
+  const originalQuantity = useRef(null);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -25,11 +30,18 @@ export default function AdminProduct() {
 
   useEffect(() => {
     let active = true;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    requestPending.current = true;
     const load = async () => {
       try {
         const [productsRes, categoriesRes] = await Promise.all([
-          fetch("http://localhost:5000/api/products"),
-          fetch("http://localhost:5000/api/categories"),
+          fetch("http://localhost:5000/api/products", {
+            signal: controller.signal,
+          }),
+          fetch("http://localhost:5000/api/categories", {
+            signal: controller.signal,
+          }),
         ]);
         const [productsData, categoriesData] = await Promise.all([
           productsRes.json(),
@@ -45,24 +57,59 @@ export default function AdminProduct() {
         if (!active) return;
         setProducts(productsData);
         setCategories(categoriesData);
-        setFormData((prev) => ({
-          ...prev,
-          category: prev.category || categoriesData[0]?.name || "",
-        }));
+        setLoadError("");
+        if (!catalogueInitialized.current) {
+          catalogueInitialized.current = true;
+          setFormData((prev) => ({
+            ...prev,
+            category: prev.category || categoriesData[0]?.name || "",
+          }));
+        }
       } catch {
         if (active)
           setLoadError(
-            "Unable to load the catalogue. Please reload this page when your connection is restored.",
+            "Unable to load the catalogue. Please refresh when your connection is restored.",
           );
       } finally {
-        if (active) setLoading(false);
+        clearTimeout(timeout);
+        if (active) {
+          requestPending.current = false;
+          setLoading(false);
+        }
       }
     };
     load();
     return () => {
       active = false;
+      clearTimeout(timeout);
+      controller.abort();
+      requestPending.current = false;
     };
+  }, [revision]);
+
+  const reload = useCallback(() => {
+    if (requestPending.current) return;
+    requestPending.current = true;
+    setLoading(true);
+    setLoadError("");
+    setRevision((value) => value + 1);
   }, []);
+
+  useEffect(() => {
+    let refreshTimer;
+    const refreshWhenVisible = () => {
+      if (document.visibilityState !== "visible") return;
+      clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(reload, 100);
+    };
+    window.addEventListener("focus", refreshWhenVisible);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    return () => {
+      clearTimeout(refreshTimer);
+      window.removeEventListener("focus", refreshWhenVisible);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
+  }, [reload]);
 
   const handleChange = (event) =>
     setFormData((prev) => ({
@@ -78,6 +125,7 @@ export default function AdminProduct() {
     reader.readAsDataURL(file);
   };
   const resetForm = () => {
+    originalQuantity.current = null;
     setFormData({
       name: "",
       price: "",
@@ -96,9 +144,15 @@ export default function AdminProduct() {
       name: formData.name,
       price: Number(formData.price),
       category: formData.category,
-      quantity: Number(formData.quantity || 0),
       image: formData.image,
     };
+    const headers = { "Content-Type": "application/json" };
+    const quantity = Number(formData.quantity || 0);
+    if (!editingId || quantity !== originalQuantity.current) {
+      payload.quantity = quantity;
+      if (editingId)
+        headers["X-Expected-Stock"] = String(originalQuantity.current);
+    }
     try {
       const response = await fetch(
         editingId
@@ -106,7 +160,7 @@ export default function AdminProduct() {
           : "http://localhost:5000/api/products",
         {
           method: editingId ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify(payload),
         },
       );
@@ -133,6 +187,7 @@ export default function AdminProduct() {
     }
   };
   const handleEdit = (product) => {
+    originalQuantity.current = Number(product.quantity || 0);
     setEditingId(product._id || product.id);
     setFormData({
       name: product.name,
@@ -194,6 +249,9 @@ export default function AdminProduct() {
         section="Catalogue"
         description="Manage your listings, prices, and inventory from one place."
       >
+        <button className="aw-button" onClick={reload} disabled={loading}>
+          {loading ? "Refreshing..." : "Refresh"}
+        </button>
         <button className="aw-button aw-button-primary" onClick={openNew}>
           <Icon name="plus" /> Add product
         </button>
@@ -277,7 +335,7 @@ export default function AdminProduct() {
           ) : loadError ? (
             <EmptyState
               title="Catalogue unavailable"
-              description="Reload this page when your connection is restored."
+              description="Use Refresh when your connection is restored."
             />
           ) : visible.length ? (
             <div className="aw-table-scroll">
@@ -312,7 +370,7 @@ export default function AdminProduct() {
                           </div>
                         </div>
                       </td>
-                      <td>${Number(product.price || 0).toFixed(2)}</td>
+                      <td>{formatCurrency(Number(product.price || 0))}</td>
                       <td>
                         <span
                           className={`aw-pill ${Number(product.quantity) > 5 ? "" : Number(product.quantity) > 0 ? "warn" : "danger"}`}
@@ -409,7 +467,7 @@ export default function AdminProduct() {
               </label>
               <div className="aw-two-fields">
                 <label>
-                  Price ($)
+                  Price (INR)
                   <input
                     required
                     className="aw-input"

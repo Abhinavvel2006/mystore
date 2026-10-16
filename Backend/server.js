@@ -1,4 +1,6 @@
-require("dotenv").config();
+require("dotenv").config({
+  path: require("node:path").join(__dirname, ".env"),
+});
 
 const express = require("express");
 const cors = require("cors");
@@ -9,10 +11,23 @@ const Admin = require("./model/admin");
 const Product = require("./model/product");
 const Category = require("./model/category");
 const Order = require("./model/order");
+const financeRoutes = require("./routes/finance");
+const { createPaymentRoutes } = require("./routes/payments");
+const {
+  readProductInput,
+  productUpdateFilter,
+} = require("./services/productInput");
 
 const app = express();
 
 app.use(cors());
+const payments = createPaymentRoutes();
+// Webhook signatures must be checked against the original, unparsed bytes.
+app.post(
+  "/api/payments/webhook",
+  express.raw({ type: "application/json", limit: "1mb" }),
+  payments.webhook,
+);
 app.use(express.json({ limit: "50mb" }));
 app.use(
   express.urlencoded({
@@ -23,7 +38,31 @@ app.use(
 
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected"))
+  .then(() => {
+    console.log("MongoDB Connected");
+    // Complete stock/revenue writes after interruptions, including previously paid orders.
+    const reconcile = () =>
+      payments
+        .reconcilePaidOrders()
+        .then((result) => {
+          if (result?.completed)
+            console.log(
+              `Updated inventory and revenue for ${result.completed} paid order(s).`,
+            );
+          if (result?.failed)
+            console.error(
+              `Stock/revenue updates will retry for ${result.failed} order(s).`,
+            );
+        })
+        .catch(() =>
+          console.error(
+            "Paid order recovery will retry when the database is available.",
+          ),
+        );
+    void reconcile();
+    const recoveryTimer = setInterval(reconcile, 30000);
+    recoveryTimer.unref();
+  })
   .catch((err) => console.log(err));
 
 const transporter = nodemailer.createTransport({
@@ -143,11 +182,14 @@ app.post("/api/admin/login", async (req, res) => {
   }
 });
 
+app.use("/api", financeRoutes);
+app.use("/api", payments.router);
+
 // Products API
 app.get("/api/products", async (req, res) => {
   try {
     const products = await Product.find().sort({ createdAt: -1 });
-    res.json(products);
+    res.set("Cache-Control", "no-store").json(products);
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -155,22 +197,45 @@ app.get("/api/products", async (req, res) => {
 
 app.post("/api/products", async (req, res) => {
   try {
-    const p = new Product(req.body);
+    const p = new Product(readProductInput(req.body));
     await p.save();
     res.json({ success: true, product: p });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res
+      .status(err.status || 500)
+      .json({ success: false, message: err.message });
   }
 });
 
 app.put("/api/products/:id", async (req, res) => {
   try {
-    const p = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const fields = readProductInput(req.body, { partial: true });
+    const filter = productUpdateFilter(
+      req.params.id,
+      fields,
+      req.get("X-Expected-Stock"),
+    );
+    const p = await Product.findOneAndUpdate(
+      filter,
+      { $set: fields },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+    if (!p)
+      return res
+        .status(409)
+        .json({
+          success: false,
+          message:
+            "The product or its stock changed while you were editing. Close and reopen the product, then try again.",
+        });
     res.json({ success: true, product: p });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res
+      .status(err.status || 500)
+      .json({ success: false, message: err.message });
   }
 });
 
@@ -240,40 +305,6 @@ app.get("/api/orders/user/:email", async (req, res) => {
       $or: [{ userEmail: email }, { customer: email }],
     }).sort({ createdAt: -1 });
     res.json(orders);
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-app.post("/api/orders", async (req, res) => {
-  try {
-    console.log("Incoming Order:");
-    console.log(req.body);
-
-    const o = new Order(req.body);
-
-    await o.save();
-
-    res.json({
-      success: true,
-      order: o,
-    });
-  } catch (err) {
-    console.log(err);
-
-    res.status(500).json({
-      success: false,
-      message: err.message,
-    });
-  }
-});
-
-app.put("/api/orders/:id", async (req, res) => {
-  try {
-    const o = await Order.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    res.json({ success: true, order: o });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -362,6 +393,15 @@ app.post("/api/google-login", async (req, res) => {
   }
 });
 
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
+const port = Number(process.env.PORT) || 5000;
+app.listen(port, (error) => {
+  if (error) {
+    console.error(
+      error.code === "EADDRINUSE"
+        ? `Cannot start backend: port ${port} is already in use. Stop the existing backend, then run npm start from the Backend folder.`
+        : `Cannot start backend (${error.code || "unknown error"}).`,
+    );
+    process.exit(1);
+  }
+  console.log(`Server running on port ${port}`);
 });

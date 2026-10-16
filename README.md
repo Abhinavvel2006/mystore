@@ -1,6 +1,12 @@
 # MyStore
 
-A modern, responsive ecommerce storefront built with React. MyStore is a starter template for an online shop that includes product listing, product detail pages, cart management, checkout flow (placeholder for payment integration), and an optional Node/Express backend.
+A modern, responsive ecommerce storefront built with React. MyStore includes product listing, cart management, Razorpay checkout, and a Node/Express backend.
+
+Razorpay uses the credentials in `Backend/.env` and supports backend-configured
+UPI, cards, net banking and wallets. From the project root, start with
+`npm --prefix Backend start` and `npm run dev` in separate terminals. If already
+inside `Backend`, use `npm start`. See [payment setup and testing](Backend/PAYMENTS.md) for method
+settings, webhook recovery and live deployment requirements.
 
 ---
 
@@ -57,7 +63,7 @@ A modern, responsive ecommerce storefront built with React. MyStore is a starter
 - Backend: Node.js + Express (optional, documented below)
 - Database: MongoDB (recommended) or PostgreSQL / MySQL
 - Build tools: Vite or Create React App (adjust commands below depending on setup)
-- Optional: Stripe for payments, Firebase/Auth0 for auth, Axios or fetch for API calls
+- Razorpay for payments, Firebase for supported sign-in methods, Axios or fetch for API calls
 
 ---
 
@@ -95,8 +101,8 @@ Create a `.env` file in the project root (do NOT commit secrets). Example `.env.
 
 ```env
 # Frontend
-VITE_API_URL=http://localhost:4000/api
-REACT_APP_STRIPE_PUBLIC_KEY=pk_test_...
+VITE_API_URL=http://localhost:5000/api
+# Razorpay credentials belong only in Backend/.env.
 # Add other keys you need for the app (auth, analytics, etc.)
 ```
 
@@ -282,6 +288,8 @@ This project includes documentation to add a Node.js + Express backend. The back
 
 ### Example API endpoints
 
+- GET /api/expenses — read the existing `myapp.Expense` collection
+- GET /api/revenues — read the existing `myapp.Revenue` collection
 - GET /api/products — list products
 - GET /api/products/:id — product detail
 - POST /api/orders — create order
@@ -291,13 +299,39 @@ This project includes documentation to add a Node.js + Express backend. The back
 
 Add controllers, route files, and middleware (auth middleware to verify JWT) as the codebase grows.
 
+### Expense and revenue records
+
+The admin **Expenses & revenue** page (`/admin/payment`) reads the exact,
+case-sensitive `Expense` and `Revenue` collections in the database configured
+by `MONGO_URI`. Empty collections show zero totals and empty ledgers. Captured
+Razorpay orders automatically add one revenue receipt and deduct purchased stock.
+Duplicate payment callbacks do not duplicate revenue or stock deductions.
+The finance page itself remains read-only and preserves existing manual entries.
+
+Expense documents support `title`, `category`, numeric `amount`, and `date`.
+Revenue documents support `title`, `source`, numeric `amount`, and `date`.
+The page displays amounts in INR. Dates can be MongoDB dates or ISO
+date strings. Refresh reloads both ledgers; export includes the loaded records.
+These finance endpoints are read-only. Run `npm run test:finance` from `Backend`
+to check collection mapping, empty results, errors, and read-only behavior.
+
+Login and signup share the same responsive account layout. Their Phone buttons
+open the phone/OTP dialog using the existing Firebase configuration in `.env`.
+Firebase Phone authentication and the applicable domain/SMS settings must be
+configured in the Firebase project for real SMS delivery. Successful phone
+verification uses the existing storefront profile storage; it does not create
+a MongoDB user record. Both account and finance requests support `VITE_API_URL`
+(including `/api`), defaulting to `http://localhost:5000/api`.
+
 ### Environment variables for backend
 
 - PORT — server port
 - MONGO_URI — database connection string (if using MongoDB)
 - JWT_SECRET — secret for signing tokens
 - FRONTEND_URL — allowed origin for CORS
-- STRIPE_SECRET_KEY — server-side Stripe key for payments
+- RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET — server-side Razorpay credentials
+- RAZORPAY_PAYMENT_METHODS — comma-separated checkout methods (default: upi,card,netbanking,wallet)
+- RAZORPAY_WEBHOOK_SECRET — separate signing secret for payment recovery webhooks
 
 ### Database options
 
@@ -343,11 +377,11 @@ services:
 
 ### Security & production notes
 
-- Never store secrets in client code. Only expose publishable keys (Stripe) on frontend.
+- Never store secrets in client code. Only expose the Razorpay Key ID on the frontend.
 - Use https in production and secure cookies (httpOnly) for auth tokens when possible.
 - Rate-limit endpoints and validate inputs.
 - Use environment-specific configurations and monitor logs.
-- For payments, perform sensitive operations on server-side only (use server Stripe secret keys to create charges).
+- Create payment orders, verify signatures and capture payments only on the backend.
 
 ---
 
@@ -362,10 +396,10 @@ This frontend expects an API to provide product and order data. Typical endpoint
 - POST /api/auth/register
 - GET /api/orders/:id (admin)
 
-Payment integration (example):
+Payment integration:
 
-- Use Stripe Checkout or Stripe Elements to handle payments.
-- Keep secret keys on server; only use publishable key in frontend (VITE/REACT_APP_STRIPE_PUBLIC_KEY).
+- Razorpay Standard Checkout is connected to the cart and backend.
+- Keep the secret key in `Backend/.env`; see [payment setup](Backend/PAYMENTS.md).
 
 Auth integration (example):
 

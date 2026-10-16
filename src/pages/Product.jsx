@@ -2,6 +2,8 @@ import "./Product.css";
 import { useEffect, useState, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
+import formatCurrency from "../currency";
+import { API_BASE } from "../services/razorpay";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowRight,
@@ -31,8 +33,8 @@ function ProductCatalog() {
     const load = async () => {
       try {
         const [productsRes, categoriesRes] = await Promise.all([
-          fetch("http://localhost:5000/api/products"),
-          fetch("http://localhost:5000/api/categories"),
+          fetch(`${API_BASE}/products`),
+          fetch(`${API_BASE}/categories`),
         ]);
         const productsData = await productsRes.json();
         const categoriesData = await categoriesRes.json();
@@ -193,7 +195,7 @@ function ProductCatalog() {
                     </p>
                     <div className="product-meta">
                       <span className="price">
-                        ${Number(p.price || 0).toFixed(2)}
+                        {formatCurrency(Number(p.price || 0))}
                       </span>
                       <span className="stock">
                         {p.quantity > 0
@@ -204,6 +206,7 @@ function ProductCatalog() {
                     <div className="card-actions">
                       <button
                         className="order-btn"
+                        disabled={!(p.quantity > 0)}
                         onClick={() =>
                           addToCart({
                             id: p._id || p.id,
@@ -213,7 +216,10 @@ function ProductCatalog() {
                           })
                         }
                       >
-                        Add to cart <FontAwesomeIcon icon={faArrowRight} />
+                        {p.quantity > 0 ? "Add to cart" : "Out of stock"}{" "}
+                        {p.quantity > 0 && (
+                          <FontAwesomeIcon icon={faArrowRight} />
+                        )}
                       </button>
                     </div>
                   </div>

@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -11,15 +11,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { CartContext } from "../context/CartContext";
 import hero from "../assets/hero.png";
-import product1 from "../assets/product1.jpg";
-import product2 from "../assets/product2.jpg";
 import product3 from "../assets/product3.jpg";
-import product4 from "../assets/product4.jpg";
-import product5 from "../assets/product5.jpg";
-import product6 from "../assets/product6.jpg";
 import category1 from "../assets/category1.jpg";
 import category2 from "../assets/category2.jpg";
 import category3 from "../assets/category3.jpg";
+import formatCurrency from "../currency";
+import { API_BASE } from "../services/razorpay";
 import "./Home.css";
 
 const categories = [
@@ -45,53 +42,36 @@ const categories = [
   },
 ];
 
-const products = [
-  {
-    id: 1,
-    name: "Nike Footwear",
-    price: 2.99,
-    image: product1,
-    badge: "Trending",
-  },
-  {
-    id: 2,
-    name: "Casio Watch",
-    price: 29.99,
-    image: product2,
-    badge: "Best value",
-  },
-  {
-    id: 3,
-    name: "Apple iPhone",
-    price: 999.99,
-    image: product3,
-    badge: "Popular",
-  },
-  {
-    id: 4,
-    name: "Samsung TV",
-    price: 499.99,
-    image: product4,
-    badge: "Home pick",
-  },
-  {
-    id: 5,
-    name: "Adidas Sneakers",
-    price: 79.99,
-    image: product5,
-    badge: "Just in",
-  },
-  {
-    id: 6,
-    name: "Sony Headphones",
-    price: 199.99,
-    image: product6,
-    badge: "Top rated",
-  },
-];
-
 function Home() {
   const { addToCart } = useContext(CartContext);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const loadProducts = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/products`, {
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error("Unable to load products.");
+        const data = await response.json();
+        if (!Array.isArray(data)) throw new Error("Unable to load products.");
+        if (!controller.signal.aborted) setProducts(data.slice(0, 6));
+      } catch {
+        if (!controller.signal.aborted) {
+          setError(
+            "Products are unavailable right now. Please try again later.",
+          );
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    };
+    loadProducts();
+    return () => controller.abort();
+  }, []);
 
   return (
     <main className="market-home">
@@ -195,28 +175,50 @@ function Home() {
             View all products <FontAwesomeIcon icon={faArrowRight} />
           </NavLink>
         </div>
-        <div className="product-grid">
-          {products.map((product) => (
-            <article className="product-card" key={product.id}>
-              <div className="product-image">
-                <img src={product.image} alt={product.name} />
-                <span>{product.badge}</span>
-              </div>
-              <div className="product-info">
-                <p className="rating">
-                  <FontAwesomeIcon icon={faStar} /> 4.8
-                </p>
-                <h3>{product.name}</h3>
-                <div>
-                  <strong>${product.price.toFixed(2)}</strong>
-                  <button onClick={() => addToCart(product)}>
-                    Add to cart
-                  </button>
+        {loading ? (
+          <p role="status">Loading products...</p>
+        ) : error ? (
+          <p role="alert">{error}</p>
+        ) : products.length === 0 ? (
+          <p>
+            New products are coming soon. Check back for our latest collection.
+          </p>
+        ) : (
+          <div className="product-grid">
+            {products.map((product) => (
+              <article className="product-card" key={product._id || product.id}>
+                <div className="product-image">
+                  {product.image && (
+                    <img src={product.image} alt={product.name} />
+                  )}
+                  <span>{product.category || "Featured"}</span>
                 </div>
-              </div>
-            </article>
-          ))}
-        </div>
+                <div className="product-info">
+                  <p className="rating">
+                    {product.quantity > 0 ? "In stock" : "Out of stock"}
+                  </p>
+                  <h3>{product.name}</h3>
+                  <div>
+                    <strong>{formatCurrency(product.price)}</strong>
+                    <button
+                      disabled={!(product.quantity > 0)}
+                      onClick={() =>
+                        addToCart({
+                          id: product._id || product.id,
+                          name: product.name,
+                          price: product.price,
+                          image: product.image,
+                        })
+                      }
+                    >
+                      {product.quantity > 0 ? "Add to cart" : "Out of stock"}
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="membership-banner">

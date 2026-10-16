@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test --test-concurrency=1 test/*.test.cjs",
+    "test:payments": "node --test test/payments.test.cjs",
+    "test:finance": "node --test test/finance.test.cjs"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +21,7 @@
     "install": "^0.13.0",
     "mongoose": "^9.7.4",
     "nodemailer": "^9.0.3",
-    "npm": "^12.0.1"
+    "npm": "^12.0.1",
+    "razorpay": "^2.9.8"
   }
 }

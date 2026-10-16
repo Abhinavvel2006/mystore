@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { EmptyState, Icon, Metric, PageHeading } from "../components/Workspace";
 import OrderTable from "../components/OrderTable";
 import useOrders from "../useOrders";
+import formatCurrency from "../../currency";
 
 export default function Dashboard() {
   const [products, setProducts] = useState([]);
@@ -172,7 +173,7 @@ export default function Dashboard() {
                           </div>
                         </div>
                       </td>
-                      <td>${Number(p.price || 0).toFixed(2)}</td>
+                      <td>{formatCurrency(Number(p.price || 0))}</td>
                       <td>
                         <span
                           className={`aw-pill ${Number(p.quantity) > 5 ? "" : "warn"}`}
@@ -298,8 +299,8 @@ export default function Dashboard() {
               ],
               [
                 "wallet",
-                "Payment overview",
-                "Review methods and expenses",
+                "Expenses & revenue",
+                "Review income and expenses",
                 "/admin/payment",
               ],
               [

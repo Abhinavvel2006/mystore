@@ -5,9 +5,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
   faCartShopping,
+  faLocationDot,
   faMagnifyingGlass,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
+import formatCurrency from "../currency";
 import "./Header.css";
 
 function Header() {
@@ -16,6 +18,9 @@ function Header() {
     JSON.parse(localStorage.getItem("currentUser")),
   );
   const [searchTerm, setSearchTerm] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState(
+    () => localStorage.getItem("deliveryAddress") || "",
+  );
   const navigate = useNavigate();
   const handleSearch = (event) => {
     event.preventDefault();
@@ -27,18 +32,40 @@ function Header() {
   };
   const handleLogout = () => {
     localStorage.removeItem("currentUser");
+    localStorage.removeItem("deliveryAddress");
+    setDeliveryAddress("");
     setCurrentUser(null);
     navigate("/");
+  };
+  const handleAddressChange = (event) => {
+    const address = event.target.value;
+    setDeliveryAddress(address);
+    localStorage.setItem("deliveryAddress", address);
   };
   return (
     <header className="store-header">
       <div className="header-topline">
-        Free delivery on orders over $50 <span>•</span> Easy 7-day returns
+        Free delivery on orders over {formatCurrency(50)} <span>•</span> Easy
+        7-day returns
       </div>
       <div className="header-main">
         <NavLink className="brand" to="/" aria-label="MyStore home">
           <img src={Logo} alt="MyStore" />
         </NavLink>
+        <label className="delivery-location">
+          <span>
+            <FontAwesomeIcon icon={faLocationDot} /> Deliver to
+          </span>
+          <input
+            type="text"
+            name="deliveryAddress"
+            autoComplete="street-address"
+            placeholder="Enter your home address"
+            aria-label="Home address for delivery"
+            value={deliveryAddress}
+            onChange={handleAddressChange}
+          />
+        </label>
         <form className="store-search" onSubmit={handleSearch}>
           <input
             type="search"

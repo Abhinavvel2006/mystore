@@ -6,6 +6,7 @@ const ProductSchema = new mongoose.Schema(
     price: { type: Number, default: 0 },
     category: { type: String },
     quantity: { type: Number, default: 0 },
+    inventoryOrderIds: { type: [String], select: false, default: undefined },
     image: { type: String },
   },
   { timestamps: true },

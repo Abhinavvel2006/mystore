@@ -53,7 +53,7 @@ function Sidepanel() {
             <h6>SETTINGS</h6>
             <li>
               <NavLink to="/admin/Payment">
-                <FontAwesomeIcon icon={faCreditCard} /> Payment
+                <FontAwesomeIcon icon={faCreditCard} /> Expenses & revenue
               </NavLink>
             </li>
             <li>
