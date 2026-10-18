@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import UserLayout from "./layouts/UserLayout";
 import AdminLayout from "./layouts/AdminLayout";
 
+import Home from "./pages/Home";
 import About from "./pages/about";
 import Product from "./pages/Product";
 import Login from "./pages/Login";
@@ -31,6 +32,7 @@ function App() {
           {/* User Website */}
           <Route element={<UserLayout />}>
             <Route path="/" element={<Product />} />
+            <Route path="/home" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/products" element={<Product />} />
             <Route path="/cart" element={<Cart />} />
