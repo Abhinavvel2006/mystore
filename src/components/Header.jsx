@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Logo from "../assets/mystore-logo.svg";
 import { NavLink, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -10,18 +10,34 @@ import {
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import formatCurrency from "../currency";
+import { useCurrentUser } from "../services/account";
+import ProfileAvatar from "./ProfileAvatar";
 import "./Header.css";
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState(() =>
-    JSON.parse(localStorage.getItem("currentUser")),
-  );
+  const currentUser = useCurrentUser();
   const [searchTerm, setSearchTerm] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState(
     () => localStorage.getItem("deliveryAddress") || "",
   );
   const navigate = useNavigate();
+  useEffect(() => {
+    const syncDeliveryAddress = () => {
+      setDeliveryAddress(localStorage.getItem("deliveryAddress") || "");
+    };
+    const handleStorage = (event) => {
+      if (event.key === "deliveryAddress" || event.key === null) {
+        syncDeliveryAddress();
+      }
+    };
+    window.addEventListener("account:user-changed", syncDeliveryAddress);
+    window.addEventListener("storage", handleStorage);
+    return () => {
+      window.removeEventListener("account:user-changed", syncDeliveryAddress);
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, []);
   const handleSearch = (event) => {
     event.preventDefault();
     const term = searchTerm.trim();
@@ -29,13 +45,6 @@ function Header() {
       term ? `/products?search=${encodeURIComponent(term)}` : "/products",
     );
     setMenuOpen(false);
-  };
-  const handleLogout = () => {
-    localStorage.removeItem("currentUser");
-    localStorage.removeItem("deliveryAddress");
-    setDeliveryAddress("");
-    setCurrentUser(null);
-    navigate("/");
   };
   const handleAddressChange = (event) => {
     const address = event.target.value;
@@ -78,13 +87,20 @@ function Header() {
           </button>
         </form>
         <button
+          type="button"
           className="menu-toggle"
           aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+          aria-controls="header-navigation"
           onClick={() => setMenuOpen((open) => !open)}
         >
           <FontAwesomeIcon icon={faBars} />
         </button>
-        <nav className={`header-actions ${menuOpen ? "open" : ""}`}>
+        <nav
+          id="header-navigation"
+          aria-label="Main navigation"
+          className={`header-actions ${menuOpen ? "open" : ""}`}
+        >
           <NavLink to="/products" onClick={() => setMenuOpen(false)}>
             Shop
           </NavLink>
@@ -95,20 +111,26 @@ function Header() {
           >
             <FontAwesomeIcon icon={faCartShopping} /> <span>Cart</span>
           </NavLink>
-          {currentUser ? (
-            <button className="account-action" onClick={handleLogout}>
-              Sign out
-            </button>
-          ) : (
-            <NavLink
-              className="account-action"
-              to="/login"
-              onClick={() => setMenuOpen(false)}
-            >
-              <FontAwesomeIcon icon={faUser} /> Sign in
-            </NavLink>
-          )}
         </nav>
+        {currentUser ? (
+          <NavLink
+            className="header-account-link"
+            to="/my-account"
+            title="My account"
+            aria-label="My account"
+            onClick={() => setMenuOpen(false)}
+          >
+            <ProfileAvatar user={currentUser} />
+          </NavLink>
+        ) : (
+          <NavLink
+            className="account-action"
+            to="/login"
+            onClick={() => setMenuOpen(false)}
+          >
+            <FontAwesomeIcon icon={faUser} /> Sign in
+          </NavLink>
+        )}
       </div>
     </header>
   );

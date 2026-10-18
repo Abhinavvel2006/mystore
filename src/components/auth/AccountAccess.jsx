@@ -15,6 +15,7 @@ import {
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../../firebase/firebase";
 import PhoneAuthDialog from "./PhoneAuthDialog";
+import { saveAccountSession } from "../../services/account";
 import "./Auth.css";
 
 const API_URL = (
@@ -34,16 +35,6 @@ async function postAccount(path, body) {
     );
   }
   return data;
-}
-
-function completeSignIn(user) {
-  // Store only the profile fields used by the storefront.
-  const { email, name, phone, provider, uid } = user;
-  localStorage.setItem(
-    "currentUser",
-    JSON.stringify({ email, name, phone, provider, uid }),
-  );
-  window.location.assign("/");
 }
 
 function GoogleMark() {
@@ -119,6 +110,23 @@ export default function AccountAccess({ mode }) {
   const [error, setError] = useState("");
   const [showPhone, setShowPhone] = useState(false);
 
+  function completeSignIn(data) {
+    saveAccountSession(data);
+    navigate(location.state?.from === "/my-account" ? "/my-account" : "/", {
+      replace: true,
+    });
+  }
+
+  async function continueWithPhone(user, isActive) {
+    try {
+      const data = await postAccount("phone-login", { idToken: user.idToken });
+      if (isActive()) completeSignIn(data);
+    } catch (failure) {
+      failure.code = "store/sign-in-failed";
+      throw failure;
+    }
+  }
+
   async function submitAccount(event) {
     event.preventDefault();
     setError("");
@@ -139,10 +147,7 @@ export default function AccountAccess({ mode }) {
           state: { registered: true, email: email.trim() },
         });
       } else {
-        completeSignIn({
-          email: data.user?.email || email.trim(),
-          provider: "email",
-        });
+        completeSignIn(data);
       }
     } catch (failure) {
       setError(
@@ -155,36 +160,59 @@ export default function AccountAccess({ mode }) {
     }
   }
 
+
   async function continueWithGoogle() {
     setError("");
     setBusy("google");
+
     try {
-      const result = await signInWithPopup(auth, new GoogleAuthProvider());
-      const data = await postAccount("google-login", {
-        name: result.user.displayName,
-        email: result.user.email,
-        provider: "google",
+      const provider = new GoogleAuthProvider();
+
+      provider.setCustomParameters({
+        prompt: "select_account",
       });
-      completeSignIn({ ...data.user, provider: "google" });
+
+      const result = await signInWithPopup(auth, provider);
+
+      if (!result.user.email) {
+        throw new Error("No email was returned by Google.");
+      }
+
+      const data = await postAccount("google-login", {
+        idToken: await result.user.getIdToken(),
+      });
+
+      completeSignIn(data);
     } catch (failure) {
+      console.error("Google sign-in error:", failure);
+
       if (
         failure.code === "auth/popup-closed-by-user" ||
         failure.code === "auth/cancelled-popup-request"
       ) {
         setError(
-          "Google sign-in was closed. You can try again whenever you're ready.",
+          "Google sign-in was closed. You can try again whenever you're ready."
         );
       } else if (failure.code === "auth/popup-blocked") {
         setError("Allow pop-ups for this site to continue with Google.");
+      } else if (
+        failure.code === "auth/popup-timeout" ||
+        failure.code === "auth/network-request-failed"
+      ) {
+        setError(
+          "Google sign-in timed out. Check your connection and try again."
+        );
       } else {
         setError(
-          "Google sign-in is unavailable right now. Please try again or use your email.",
+          failure.message ||
+          "Google sign-in is unavailable. Please try again or use your email."
         );
       }
     } finally {
       setBusy("");
     }
   }
+
 
   return (
     <main
@@ -273,6 +301,11 @@ export default function AccountAccess({ mode }) {
             {!registering && location.state?.registered && !error && (
               <p className="account-feedback account-success" role="status">
                 Your account is ready. Sign in to start shopping.
+              </p>
+            )}
+            {!registering && location.state?.from === "/my-account" && !error && (
+              <p className="account-feedback" role="status">
+                Sign in to view and update your account.
               </p>
             )}
             {error && (
@@ -386,7 +419,7 @@ export default function AccountAccess({ mode }) {
       {showPhone && (
         <PhoneAuthDialog
           onClose={() => setShowPhone(false)}
-          onSuccess={completeSignIn}
+          onSuccess={continueWithPhone}
         />
       )}
     </main>

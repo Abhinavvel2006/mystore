@@ -244,6 +244,35 @@
   color: #0f172a;
 }
 
+.checkout-methods-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.checkout-limit-note {
+  margin-top: 16px;
+  border: 1px solid #f2cf9c;
+  border-radius: 10px;
+  padding: 12px;
+  background: #fff8ed;
+  color: #805012;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.checkout-limit-note a,
+.cart-payment-help {
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+
+.cart-payment-help {
+  display: inline-block;
+  margin-left: 8px;
+}
+
 .checkout-method-list {
   display: flex;
   flex-wrap: wrap;

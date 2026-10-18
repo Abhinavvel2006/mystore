@@ -408,17 +408,19 @@ test("checkout config exposes only the public key and allowed payment methods", 
   const result = await f.request("/payments/config");
   assert.equal(result.status, 200);
   assert.equal(result.body.keyId, KEY_ID);
+  assert.equal(result.body.currency, "INR");
+  assert.equal(result.body.maxAmount, null);
   assert.deepEqual(result.body.methods, {
     upi: true,
     card: true,
     netbanking: true,
     wallet: true,
-    emi: false,
+    emi: true,
     paylater: false,
   });
   assert.deepEqual(
     result.body.methodLabels.map((item) => item.id),
-    ["upi", "card", "netbanking", "wallet"],
+    ["upi", "card", "netbanking", "wallet", "emi"],
   );
   assert.ok(!result.text.includes(KEY_SECRET));
   assert.ok(!result.text.includes(WEBHOOK_SECRET));
@@ -452,6 +454,71 @@ test("missing credentials and unsupported methods fail closed without contacting
     assert.equal((await f.create()).status, 503);
     assert.equal(f.calls.create.length, 0);
   }
+});
+
+test("configured maximum is returned in paise and accepts the exact total boundary", async (t) => {
+  const f = await fixture(t, { RAZORPAY_MAX_AMOUNT_INR: "550.00" });
+  const config = await f.request("/payments/config");
+  assert.equal(config.status, 200);
+  assert.equal(config.body.maxAmount, 55000);
+  const order = assertCreated(await f.create());
+  assert.equal(order.amount, 55000);
+  assert.equal(order.maxAmount, 55000);
+  assert.equal(f.calls.create[0].amount, 55000);
+
+  f.env.RAZORPAY_MAX_AMOUNT_INR = "550.05";
+  assert.equal((await f.request("/payments/config")).body.maxAmount, 55005);
+  f.env.RAZORPAY_MAX_AMOUNT_INR = "550.1";
+  assert.equal((await f.request("/payments/config")).body.maxAmount, 55010);
+});
+
+test("amount limit includes server-calculated shipping and ignores forged client totals and limits", async (t) => {
+  const f = await fixture(t, { RAZORPAY_MAX_AMOUNT_INR: "549.99" });
+  const result = await f.create({
+    total: 1,
+    amount: 1,
+    shipping: 0,
+    maxAmount: 999999999,
+    RAZORPAY_MAX_AMOUNT_INR: "999999999",
+    items: [{ productId: PRODUCT_ID, qty: 2, price: 0.01 }],
+  });
+  assert.equal(result.status, 422, result.text);
+  assert.equal(result.body.code, "PAYMENT_AMOUNT_LIMIT");
+  assert.match(result.body.message, /shipping and tax/);
+  assert.match(result.body.message, /549\.99/);
+  assert.equal(f.calls.create.length, 0);
+  assert.equal(f.records.size, 0);
+});
+
+test("an unset or blank maximum does not impose an invented Razorpay limit", async (t) => {
+  for (const maximum of [undefined, "", "   "]) {
+    const f = await fixture(t, { RAZORPAY_MAX_AMOUNT_INR: maximum });
+    f.products[0].price = 200000;
+    const config = await f.request("/payments/config");
+    assert.equal(config.status, 200);
+    assert.equal(config.body.maxAmount, null);
+    const order = assertCreated(
+      await f.create({ items: [{ productId: PRODUCT_ID, qty: 1 }] }),
+    );
+    assert.equal(order.amount, 22000000);
+    assert.equal(f.calls.create[0].amount, 22000000);
+  }
+});
+
+test("invalid maximum configuration fails closed before creating any order", async (t) => {
+  const f = await fixture(t);
+  for (const maximum of [
+    "0", "0.00", "-100", "NaN", "Infinity", "1e5", "0x10",
+    "1,00,000", "1.001", "100 INR", "9007199254740991",
+  ]) {
+    f.env.RAZORPAY_MAX_AMOUNT_INR = maximum;
+    const config = await f.request("/payments/config");
+    assert.equal(config.status, 503, maximum);
+    assert.match(config.body.message, /configuration is invalid/);
+    assert.equal((await f.create()).status, 503, maximum);
+  }
+  assert.equal(f.calls.create.length, 0);
+  assert.equal(f.records.size, 0);
 });
 
 test("order creation uses database prices plus shipping and ignores forged totals and payment fields", async (t) => {
@@ -604,6 +671,26 @@ test("a checkout retry recovers payment confirmed by webhook without charging ag
   assert.deepEqual(f.calls, providerCalls);
 });
 
+test("lowering the maximum blocks reuse of an unpaid checkout but preserves payment verification and recovery", async (t) => {
+  const f = await fixture(t);
+  const checkoutId = "checkout_changed_limit_001";
+  const first = assertCreated(await f.create({ checkoutId }));
+  f.env.RAZORPAY_MAX_AMOUNT_INR = "500";
+  const blocked = await f.create({ checkoutId });
+  assert.equal(blocked.status, 422, blocked.text);
+  assert.equal(blocked.body.code, "PAYMENT_AMOUNT_LIMIT");
+  assert.equal(f.calls.create.length, 1);
+  assert.equal(f.records.size, 1);
+
+  // A customer may have paid before the limit changed. Always allow confirmation.
+  assert.equal((await f.verify(first, f.payment(first))).status, 200);
+  const recovered = assertCreated(await f.create({ checkoutId }));
+  assert.equal(recovered.alreadyPaid, true);
+  assert.equal(recovered.orderId, first.orderId);
+  assert.equal(recovered.order.paymentStatus, "paid");
+  assert.equal(f.calls.create.length, 1);
+});
+
 test("failed gateway creation releases the checkout reference and redacts provider errors", async (t) => {
   const f = await fixture(t);
   const originalCreate = f.gateway.orders.create;
@@ -617,8 +704,74 @@ test("failed gateway creation releases the checkout reference and redacts provid
   assert.ok(
     [...f.records.values()].every((order) => order.checkoutId !== checkoutId),
   );
+  const failed = [...f.records.values()][0];
+  assert.equal(failed.status, "Payment setup failed");
+  assert.equal(failed.paymentStatus, "failed");
+  assert.equal(failed.razorpayOrderId, undefined);
   f.gateway.orders.create = originalCreate;
-  assertCreated(await f.create({ checkoutId }));
+  const retry = assertCreated(await f.create({ checkoutId }));
+  assert.equal(retry.order.paymentStatus, "pending");
+  assert.equal(retry.order.status, "Awaiting payment");
+  assert.notEqual(retry.orderId, failed._id);
+});
+
+test("provider amount-limit errors become safe actionable errors and failed setup records", async (t) => {
+  for (const description of [
+    "Amount exceeds maximum amount allowed.",
+    "Order amount exceeds the allowed transaction limit.",
+  ]) {
+    const f = await fixture(t);
+    const originalCreate = f.gateway.orders.create;
+    f.gateway.orders.create = async () => {
+      throw {
+        statusCode: 400,
+        error: {
+          code: "BAD_REQUEST_ERROR",
+          description,
+          request: { authorization: KEY_SECRET },
+        },
+      };
+    };
+    const checkoutId = "checkout_provider_limit_001";
+    const result = await f.create({ checkoutId });
+    assert.equal(result.status, 422, result.text);
+    assert.equal(result.body.code, "PAYMENT_AMOUNT_LIMIT");
+    assert.match(result.body.message, /Reduce your cart total or contact the store/);
+    assert.ok(!result.text.includes(KEY_SECRET));
+    assert.ok(!result.text.includes(description));
+    const failed = [...f.records.values()][0];
+    assert.equal(failed.status, "Payment setup failed");
+    assert.equal(failed.paymentStatus, "failed");
+    assert.equal(failed.checkoutId, undefined);
+    assert.equal(failed.razorpayOrderId, undefined);
+    assert.equal(f.products[0].quantity, 12);
+    assert.equal(f.revenues.size, 0);
+    f.gateway.orders.create = originalCreate;
+    assertCreated(await f.create({ checkoutId }));
+  }
+});
+
+test("unrelated provider errors remain redacted without being labelled as amount limits", async (t) => {
+  const f = await fixture(t);
+  for (const description of [
+    `Invalid API credentials: ${KEY_SECRET}`,
+    `Request rate limit exceeded: ${KEY_SECRET}`,
+    `Amount must be at least INR 1: ${KEY_SECRET}`,
+  ]) {
+    f.gateway.orders.create = async () => {
+      throw {
+        status: 400,
+        statusCode: 400,
+        message: description,
+        error: { code: "BAD_REQUEST_ERROR", description },
+      };
+    };
+    const result = await f.create();
+    assert.equal(result.status, 503, result.text);
+    assert.equal(result.body.code, undefined);
+    assert.ok(!result.text.includes(KEY_SECRET));
+    assert.ok(!result.text.includes(description));
+  }
 });
 
 test("gateway order with an unexpected amount is never exposed as a valid checkout", async (t) => {

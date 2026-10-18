@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Cart from "./pages/Cart";
 import Contact from "./pages/Contact";
+import MyAccount from "./pages/MyAccount";
 
 import AdminLogin from "./admin/pages/login";
 import ProtectedAdminRoute from "./admin/components/ProtectedAdminRoute";
@@ -34,6 +35,7 @@ function App() {
             <Route path="/products" element={<Product />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/my-account" element={<MyAccount />} />
           </Route>
 
           {/* User Login */}

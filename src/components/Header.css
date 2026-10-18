@@ -75,6 +75,7 @@
   display: flex;
   align-items: center;
   flex: 1;
+  min-width: 0;
   max-width: 570px;
   background: #f4f2ec;
   border: 1px solid transparent;
@@ -150,6 +151,32 @@
   background: #245148;
 }
 
+.header-account-link {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.header-account-link:hover,
+.header-account-link.active {
+  border-color: #c6d4c2;
+  background: #edf3e9;
+}
+
+.header-account-link:focus-visible,
+.account-action:focus-visible,
+.menu-toggle:focus-visible,
+.header-actions > a:focus-visible {
+  outline: 3px solid #b85834;
+  outline-offset: 3px;
+}
+
 .menu-toggle {
   display: none;
   border: 0;
@@ -169,6 +196,7 @@
 
   .store-search {
     order: 3;
+    flex: 1 1 100%;
     max-width: none;
     width: 100%;
   }
@@ -199,8 +227,7 @@
     display: flex;
   }
 
-  .header-actions > a,
-  .account-action {
+  .header-actions > a {
     padding: 12px 4px;
     border: 0;
     border-radius: 0;
@@ -214,7 +241,7 @@
   }
 
   .account-action {
-    width: 100%;
+    padding: 9px 11px;
   }
 }
 

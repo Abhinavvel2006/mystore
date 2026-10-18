@@ -17,11 +17,38 @@ const METHOD_LABELS = {
 const objectId = /^[a-f\d]{24}$/i;
 const gatewayOrderId = /^order_[a-zA-Z0-9]+$/;
 const gatewayPaymentId = /^pay_[a-zA-Z0-9]+$/;
+const publicError = Symbol("public payment error");
 
-function fail(status, message) {
+function fail(status, message, code) {
   const error = new Error(message);
   error.status = status;
+  error.code = code;
+  error[publicError] = true;
   throw error;
+}
+
+function isAmountLimitError(error) {
+  const description = error?.error?.description;
+  if (typeof description !== "string") return false;
+  return (
+    /\bamount exceeds maximum amount allowed\b/i.test(description) ||
+    /\bamount\b[^.\r\n]{0,80}\bexceeds?\b[^.\r\n]{0,80}\blimit\b/i.test(
+      description,
+    )
+  );
+}
+
+function assertAmountLimit(amount, maxAmount) {
+  if (maxAmount === null || amount <= maxAmount) return;
+  const maximum = (maxAmount / 100).toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  fail(
+    422,
+    `Your order total, including shipping and tax, exceeds this store's online payment limit of INR ${maximum}. Reduce your cart total or contact the store for help.`,
+    "PAYMENT_AMOUNT_LIMIT",
+  );
 }
 
 function validSignature(message, signature, secret) {
@@ -53,7 +80,7 @@ function createPaymentRoutes({
       );
     }
     const enabled = (
-      env.RAZORPAY_PAYMENT_METHODS ?? "upi,card,netbanking,wallet"
+      env.RAZORPAY_PAYMENT_METHODS ?? "upi,card,netbanking,wallet,emi"
     )
       .split(",")
       .map((method) => method.trim().toLowerCase())
@@ -70,9 +97,23 @@ function createPaymentRoutes({
         enabled.includes(method),
       ]),
     );
+    const configuredMaximum = env.RAZORPAY_MAX_AMOUNT_INR?.trim() || "";
+    let maxAmount = null;
+    if (configuredMaximum) {
+      // Parse decimal rupees exactly; never round a configured payment limit.
+      if (!/^\d+(?:\.\d{1,2})?$/.test(configuredMaximum)) {
+        fail(503, "The server payment amount limit configuration is invalid.");
+      }
+      const [rupees, paise = ""] = configuredMaximum.split(".");
+      maxAmount = Number(rupees) * 100 + Number(paise.padEnd(2, "0"));
+      if (!Number.isSafeInteger(maxAmount) || maxAmount <= 0) {
+        fail(503, "The server payment amount limit configuration is invalid.");
+      }
+    }
     return {
       keyId,
       currency: "INR",
+      maxAmount,
       methods,
       methodLabels: Object.entries(METHOD_LABELS)
         .filter(([id]) => methods[id])
@@ -98,11 +139,13 @@ function createPaymentRoutes({
     try {
       await handler(req, res);
     } catch (error) {
-      const status = error.status || 503;
+      const exposed = error?.[publicError] === true;
+      const status = exposed ? error.status : 503;
       // Gateway errors can contain credentials/request headers. Never return or log them.
       res.status(status).json({
         success: false,
-        message: error.status
+        ...(exposed && error.code ? { code: error.code } : {}),
+        message: exposed
           ? error.message
           : "The payment service is temporarily unavailable. Please retry; keep any payment reference.",
       });
@@ -121,7 +164,7 @@ function createPaymentRoutes({
   }
 
   async function createCheckout(req, res) {
-    config();
+    const { maxAmount } = config();
     const body = req.body || {};
     const userEmail =
       typeof body.userEmail === "string" ? body.userEmail.trim() : "";
@@ -194,6 +237,7 @@ function createPaymentRoutes({
         const completed = await effects.apply(previous);
         return res.json({ ...checkoutResponse(completed), alreadyPaid: true });
       }
+      assertAmountLimit(previous.amount, maxAmount);
       if (!previous.razorpayOrderId) {
         fail(
           409,
@@ -236,6 +280,7 @@ function createPaymentRoutes({
         "The order total must be at least INR 1 and within the supported range.",
       );
     }
+    assertAmountLimit(amount, maxAmount);
 
     let order;
     try {
@@ -293,8 +338,19 @@ function createPaymentRoutes({
       // Release the request key so a retry can create another provider order.
       await Order.updateOne(
         { _id: localOrderId, razorpayOrderId: { $exists: false } },
-        { $unset: { checkoutId: 1 } },
+        {
+          $unset: { checkoutId: 1 },
+          $set: { status: "Payment setup failed", paymentStatus: "failed" },
+        },
+        { runValidators: true },
       );
+      if (isAmountLimitError(error)) {
+        fail(
+          422,
+          "This order exceeds the online payment limit currently allowed by the store's payment provider. Reduce your cart total or contact the store to arrange payment. The store owner can request a higher limit from Razorpay.",
+          "PAYMENT_AMOUNT_LIMIT",
+        );
+      }
       throw error;
     }
     res.status(201).json(checkoutResponse(order));

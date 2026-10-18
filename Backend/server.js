@@ -13,6 +13,8 @@ const Category = require("./model/category");
 const Order = require("./model/order");
 const financeRoutes = require("./routes/finance");
 const { createPaymentRoutes } = require("./routes/payments");
+const { createAccountRoutes } = require("./routes/account");
+const { ensureUserIndexes } = require("./services/accountProfile");
 const {
   readProductInput,
   productUpdateFilter,
@@ -36,7 +38,7 @@ app.use(
   }),
 );
 
-mongoose
+const databaseReady = mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("MongoDB Connected");
@@ -62,8 +64,11 @@ mongoose
     void reconcile();
     const recoveryTimer = setInterval(reconcile, 30000);
     recoveryTimer.unref();
-  })
-  .catch((err) => console.log(err));
+  });
+const accountReady = databaseReady.then(() => ensureUserIndexes(User));
+accountReady.catch(() => console.error("Database or account indexes are unavailable. Account requests will retry after the backend restarts."));
+
+app.use("/api", createAccountRoutes({ ready: accountReady }));
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -76,79 +81,6 @@ const transporter = nodemailer.createTransport({
           pass: process.env.SMTP_PASS,
         }
       : undefined,
-});
-
-app.post("/api/register", async (req, res) => {
-  try {
-    const { email, password, confirmPassword } = req.body;
-
-    if (password !== confirmPassword) {
-      return res.json({
-        success: false,
-        message: "Passwords do not match",
-      });
-    }
-
-    const existingUser = await User.findOne({ email });
-
-    if (existingUser) {
-      return res.json({
-        success: false,
-        message: "User already exists",
-      });
-    }
-
-    const newUser = new User({
-      email,
-      password,
-    });
-
-    await newUser.save();
-
-    res.json({
-      success: true,
-      message: "Registration successful",
-      user: { email: newUser.email },
-    });
-  } catch (error) {
-    console.log(error);
-
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-    });
-  }
-});
-
-app.post("/api/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    const user = await User.findOne({
-      email,
-      password,
-    });
-
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid email or Password",
-      });
-    }
-
-    res.json({
-      success: true,
-      message: "Login Successful",
-      user: { email: user.email },
-    });
-  } catch (error) {
-    console.log(error);
-
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-    });
-  }
 });
 
 // admin section
@@ -362,34 +294,6 @@ app.post("/api/contact", async (req, res) => {
   } catch (err) {
     console.error("Contact form error:", err);
     res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-app.post("/api/google-login", async (req, res) => {
-  try {
-    const { name, email, provider } = req.body;
-
-    let user = await User.findOne({ email });
-
-    if (!user) {
-      user = new User({
-        name,
-        email,
-        provider,
-      });
-
-      await user.save();
-    }
-
-    res.json({
-      success: true,
-      user,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
   }
 });
 

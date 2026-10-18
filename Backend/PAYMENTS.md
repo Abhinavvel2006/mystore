@@ -19,20 +19,62 @@ for the secret. An optional frontend `VITE_API_URL` must include `/api`
 ## Payment methods
 
 ```env
-RAZORPAY_PAYMENT_METHODS=upi,card,netbanking,wallet
+RAZORPAY_PAYMENT_METHODS=upi,card,netbanking,wallet,emi
 ```
 
-These are the defaults if the variable is absent. Optional additional values are
-`emi` and `paylater`. Restart the server after editing this list. The backend sends
+These are the defaults if the variable is absent. `paylater` is available as an
+explicit opt-in. An existing `RAZORPAY_PAYMENT_METHODS` value takes precedence:
+add `emi` to that value to show EMI in the app. Restart the server after editing
+this list. The backend sends
 the selected methods to Standard Checkout's display configuration. Availability
 still depends on the methods enabled/approved in your Razorpay Dashboard, the
 device, and payment eligibility. Changing this list cannot activate an account
 feature. UPI uses Razorpay's supported intent/QR flow; no UPI PIN, bank credentials,
-or card details are handled by this app.
+or card details are handled by this app. EMI also requires approval/activation
+in Razorpay and an eligible card, bank, and order amount. Adding `emi` to this
+configuration requests its display; it cannot guarantee that Razorpay will offer
+an EMI plan for a particular purchase.
+
+## Transaction limits
+
+Razorpay can reject order creation with **Amount exceeds maximum amount allowed**
+when the order exceeds the limit configured for your account and currency. There
+is no universal maximum hardcoded in this app. A product priced at INR 2,00,000
+has a checkout total of INR 2,20,000 after the existing 10% shipping/tax charge;
+the complete total is sent to Razorpay without reducing or splitting it.
+
+Check your current limit and request any required increase in Razorpay Dashboard
+under **Account & Settings → Transaction Limits**. Approval is handled by
+Razorpay. Updating application code or changing payment methods does not raise
+the merchant account's limit. See the official
+[transaction limit instructions](https://razorpay.com/docs/payments/dashboard/account-settings/transaction-limits/)
+and [Create an Order errors](https://razorpay.com/docs/api/orders/create/).
+
+Optionally set the store's known, approved per-order maximum so the app can
+explain an oversized cart before creating an order:
+
+```env
+# Decimal INR, including shipping and tax; leave blank when unknown.
+RAZORPAY_MAX_AMOUNT_INR=
+```
+
+Use a positive amount with at most two decimal places and no commas. Restart the
+backend after editing it, then reload payment methods. The public configuration
+returns `maxAmount` in paise (or `null` when the setting is blank/unset), with
+`currency: "INR"`. The backend independently checks the full server-calculated
+total, including shipping/tax, before creating any local or provider order.
+Invalid settings disable checkout instead of silently ignoring the limit.
+
+Known Razorpay maximum-amount rejections return HTTP 422 with
+`code: "PAYMENT_AMOUNT_LIMIT"` and a safe message asking the customer to reduce
+the cart total or contact the store. Other provider errors stay redacted. A
+failed provider setup is recorded as `Payment setup failed` / `failed`, and its
+checkout reference is released so the cart can be retried after resolution.
 
 ## Order and payment flow
 
-- `GET /api/payments/config` returns the public key and method configuration.
+- `GET /api/payments/config` returns the public key, method configuration, INR
+  currency, and optional maximum amount in paise.
 - `POST /api/payments/orders` accepts `userEmail`, `deliveryAddress`, and
   `items: [{productId, qty}]`. An optional `checkoutId` makes creation retries
   reuse the same checkout. `POST /api/orders` is an alias for this protected
@@ -92,10 +134,10 @@ Use matching Razorpay **test** keys for a manual checkout test before switching
 to live keys. Test success, cancellation, declined payment, verification retry,
 and webhook replay. Confirm the order becomes paid only after capture.
 
-The existing app uses browser profile storage rather than authenticated server
-sessions and exposes admin/product/order APIs without authorization. Before
-public live deployment, add server authentication and admin/customer ownership
-checks to those existing routes. The checkout email is not proof of identity.
+Customer profiles now use authenticated server sessions; see [Accounts](ACCOUNTS.md).
+The existing admin/product/order APIs still lack authorization. Before public
+live deployment, add authentication and admin/customer ownership checks to those
+legacy routes. The checkout email is not proof of identity.
 
 References: [Standard Checkout integration](https://razorpay.com/docs/payments/payment-gateway/web-integration/standard/integration-steps/),
 [payment method configuration](https://razorpay.com/docs/payments/payment-gateway/web-integration/standard/configure-payment-methods/),

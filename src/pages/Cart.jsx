@@ -3,6 +3,11 @@ import "./Cart.css";
 import { NavLink } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import formatCurrency from "../currency";
+import { useCurrentUser } from "../services/account";
+import {
+  isPaymentAmountLimit,
+  paymentErrorMessage,
+} from "../services/paymentErrors";
 import {
   API_BASE,
   loadRazorpayCheckout,
@@ -26,12 +31,7 @@ function cartFingerprint(cart) {
 }
 
 function Cart() {
-  let currentUser;
-  try {
-    currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
-  } catch {
-    currentUser = null;
-  }
+  const currentUser = useCurrentUser();
   return (
     <CartContent
       key={currentUser?.email || "guest"}
@@ -48,6 +48,7 @@ function CartContent({ currentUser }) {
   const checkoutStorageKey = `razorpay:checkout:${userEmail}`;
   const [phase, setPhase] = useState("idle");
   const [message, setMessage] = useState("");
+  const [amountLimitIssue, setAmountLimitIssue] = useState(false);
   const [userOrders, setUserOrders] = useState([]);
   const [paymentConfig, setPaymentConfig] = useState(null);
   const [configLoading, setConfigLoading] = useState(true);
@@ -76,13 +77,21 @@ function CartContent({ currentUser }) {
     };
   }, []);
 
-  const subtotal = cart.reduce(
+  const subtotalPaise = cart.reduce(
     (total, item) =>
-      total + Number(item.price || 0) * Number(item.quantity || 0),
+      total +
+      Math.round(Number(item.price || 0) * 100) * Number(item.quantity || 0),
     0,
   );
-  const shipping = cart.length > 0 ? subtotal * 0.1 : 0;
-  const total = subtotal + shipping;
+  const shippingPaise = Math.round(subtotalPaise * 0.1);
+  const totalPaise = subtotalPaise + shippingPaise;
+  const subtotal = subtotalPaise / 100;
+  const shipping = shippingPaise / 100;
+  const total = totalPaise / 100;
+  const exceedsConfiguredLimit =
+    Number.isSafeInteger(paymentConfig?.maxAmount) &&
+    paymentConfig.maxAmount > 0 &&
+    totalPaise > paymentConfig.maxAmount;
 
   const loadUserOrders = useCallback(() => {
     if (!userEmail) return Promise.resolve();
@@ -107,9 +116,10 @@ function CartContent({ currentUser }) {
         setPaymentConfig(config);
         setConfigError("");
       })
-      .catch((error) =>
-        setConfigError(error.message || "Unable to load payment methods."),
-      )
+      .catch((error) => {
+        setPaymentConfig(null);
+        setConfigError(error.message || "Unable to load payment methods.");
+      })
       .finally(() => setConfigLoading(false));
   }, []);
 
@@ -122,6 +132,7 @@ function CartContent({ currentUser }) {
     verifying.current = true;
     busy.current = true;
     setPhase("verifying");
+    setAmountLimitIssue(false);
     setMessage("Confirming your payment. Please keep this page open.");
 
     try {
@@ -177,6 +188,7 @@ function CartContent({ currentUser }) {
 
   const handleCheckout = async () => {
     if (busy.current) return;
+    setAmountLimitIssue(false);
     if (pendingVerification) {
       await verifyPayment(pendingVerification);
       return;
@@ -193,13 +205,25 @@ function CartContent({ currentUser }) {
     }
 
     if (!userEmail) {
-      setMessage("Please sign in to place and save your order.");
+      setMessage(
+        currentUser
+          ? "Checkout requires an email address. Please sign in with email or Google to place your order."
+          : "Please sign in to place and save your order.",
+      );
       return;
     }
 
     if (!paymentConfig) {
       setMessage(
         "Payment methods are unavailable. Please reload the payment methods and try again.",
+      );
+      return;
+    }
+
+    if (exceedsConfiguredLimit) {
+      setAmountLimitIssue(true);
+      setMessage(
+        `Your order total exceeds this store's online payment limit of ${formatCurrency(paymentConfig.maxAmount / 100)}. Please contact us for help.`,
       );
       return;
     }
@@ -254,6 +278,11 @@ function CartContent({ currentUser }) {
       }
       const instruments = Object.entries(data.methods || {})
         .filter(([, enabled]) => enabled === true)
+        .sort(
+          ([left], [right]) =>
+            Number(right === currentUser?.paymentMethod) -
+            Number(left === currentUser?.paymentMethod),
+        )
         .map(([method]) => ({ method }));
       if (!instruments.length)
         throw new Error("No payment methods are currently enabled.");
@@ -267,7 +296,11 @@ function CartContent({ currentUser }) {
         order_id: data.razorpayOrderId,
         name: "Smart Cart",
         description: "Payment for your order",
-        prefill: { name: currentUser?.name || "", email: userEmail },
+        prefill: {
+          name: currentUser?.name || "",
+          email: userEmail,
+          contact: currentUser?.phone || "",
+        },
         config: {
           display: {
             blocks: {
@@ -308,9 +341,8 @@ function CartContent({ currentUser }) {
         theme: { color: "#2563eb" },
       });
       checkout.on("payment.failed", (response) => {
-        paymentError =
-          response.error?.description ||
-          "The payment was unsuccessful. Your cart is saved. You can try another payment method.";
+        paymentError = paymentErrorMessage(response.error, data.amount);
+        setAmountLimitIssue(isPaymentAmountLimit(response.error));
         setMessage(paymentError);
       });
       checkoutInstance.current = checkout;
@@ -321,10 +353,9 @@ function CartContent({ currentUser }) {
     } catch (error) {
       busy.current = false;
       setPhase("idle");
-      setMessage(
-        error.message ||
-          "Unable to open payment checkout. Your cart is saved. Please try again.",
-      );
+      setAmountLimitIssue(isPaymentAmountLimit(error));
+      setMessage(paymentErrorMessage(error, totalPaise));
+      void loadUserOrders();
     }
   };
 
@@ -351,6 +382,11 @@ function CartContent({ currentUser }) {
           {message ? (
             <div className="cart-message" role="status" aria-live="polite">
               {message}
+              {amountLimitIssue && (
+                <NavLink className="cart-payment-help" to="/contact">
+                  Contact support
+                </NavLink>
+              )}
             </div>
           ) : null}
           {pendingVerification && !message ? (
@@ -463,7 +499,9 @@ function CartContent({ currentUser }) {
                             : order.paymentStatus === "pending"
                               ? "Awaiting payment"
                               : order.paymentStatus === "failed"
-                                ? "Payment failed"
+                                ? order.status === "Payment setup failed"
+                                  ? "Checkout could not be started"
+                                  : "Payment failed"
                                 : "Payment status unavailable"}
                           {order.paymentMethod
                             ? ` · ${order.paymentMethod.toUpperCase()}`
@@ -500,8 +538,34 @@ function CartContent({ currentUser }) {
           <p className="checkout-note">
             The final amount is confirmed in the payment window.
           </p>
+          {exceedsConfiguredLimit && !pendingVerification && (
+            <div className="checkout-limit-note" role="alert">
+              Online payments for this store are limited to{" "}
+              {formatCurrency(paymentConfig.maxAmount / 100)} per order,
+              including shipping and tax.{" "}
+              <NavLink to="/contact">
+                Contact us for help with this order.
+              </NavLink>
+            </div>
+          )}
           <div className="checkout-methods" aria-live="polite">
-            <h3>Payment methods</h3>
+            <div className="checkout-methods-heading">
+              <h3>Payment methods</h3>
+              {!configError && (
+                <button
+                  className="checkout-retry"
+                  type="button"
+                  disabled={isPlacingOrder || configLoading}
+                  aria-label="Refresh payment methods"
+                  onClick={() => {
+                    setConfigLoading(true);
+                    void loadPaymentConfig();
+                  }}
+                >
+                  Refresh
+                </button>
+              )}
+            </div>
             {configLoading ? (
               <p>Loading payment methods...</p>
             ) : configError ? (
@@ -532,9 +596,15 @@ function CartContent({ currentUser }) {
                     ))}
                 </ul>
                 <p>
-                  Choose your method in Razorpay. Available options depend on
-                  your payment provider.
+                  Choose your method in Razorpay. Availability depends on your
+                  bank and the payment provider.
                 </p>
+                {paymentConfig?.methods?.emi && (
+                  <p>
+                    EMI plans appear for eligible cards and purchases when
+                    enabled by the payment provider.
+                  </p>
+                )}
               </>
             )}
           </div>
@@ -545,7 +615,10 @@ function CartContent({ currentUser }) {
             disabled={
               isPlacingOrder ||
               (!pendingVerification &&
-                (!cart.length || !paymentConfig || configLoading))
+                (!cart.length ||
+                  !paymentConfig ||
+                  configLoading ||
+                  exceedsConfiguredLimit))
             }
           >
             {phase === "preparing"

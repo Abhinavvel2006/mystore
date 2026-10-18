@@ -8,6 +8,13 @@ UPI, cards, net banking and wallets. From the project root, start with
 inside `Backend`, use `npm start`. See [payment setup and testing](Backend/PAYMENTS.md) for method
 settings, webhook recovery and live deployment requirements.
 
+Signed-in customers can open **My Account** from the round profile avatar to save
+their name, age, location, contact number, delivery address, and preferred payment
+method. Google accounts use their profile photo; other accounts show initials.
+See [account setup](Backend/ACCOUNTS.md) for session and Firebase configuration.
+Restart an already-running backend after updating, then sign in again to create
+an authenticated account session.
+
 ---
 
 ## Table of contents

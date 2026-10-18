@@ -29,6 +29,7 @@ function normalizePhone(value, countryCode) {
 }
 
 function phoneErrorMessage(error) {
+  if (error?.code === "store/sign-in-failed") return error.message;
   const messages = {
     "auth/invalid-phone-number":
       "That mobile number does not look right. Check it and try again.",
@@ -270,14 +271,20 @@ export default function PhoneAuthDialog({ onClose, onSuccess }) {
       const result = await confirmationRef.current.confirm(code);
       if (!mountedRef.current || request !== requestRef.current) return;
       const user = {
+        idToken: await result.user.getIdToken(),
         phone: result.user.phoneNumber,
         uid: result.user.uid,
         provider: "phone",
         ...(result.user.displayName ? { name: result.user.displayName } : {}),
       };
+      if (!mountedRef.current || request !== requestRef.current) return;
+      await onSuccess?.(
+        user,
+        () => mountedRef.current && request === requestRef.current,
+      );
+      if (!mountedRef.current || request !== requestRef.current) return;
       setStep("success");
       setNotice("Your phone is verified. You are signed in.");
-      onSuccess?.(user);
     } catch (verificationError) {
       if (!mountedRef.current || request !== requestRef.current) return;
       clearVerifier();

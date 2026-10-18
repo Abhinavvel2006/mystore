@@ -81,9 +81,16 @@ export async function paymentRequest(path, payload) {
         "The payment server returned an invalid response. Please try again.",
       );
     if (!response.ok && !data.pending) {
-      throw new Error(
+      const error = new Error(
         data.message || "Unable to process your payment request.",
       );
+      error.status = response.status;
+      if (data.code === "PAYMENT_AMOUNT_LIMIT") {
+        error.code = data.code;
+        if (Number.isSafeInteger(data.maxAmount))
+          error.maxAmount = data.maxAmount;
+      }
+      throw error;
     }
     return data;
   } catch (error) {

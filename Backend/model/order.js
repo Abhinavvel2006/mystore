@@ -20,7 +20,7 @@ const OrderSchema = new mongoose.Schema(
     subtotal: Number,
     shipping: Number,
     paymentProvider: String,
-    paymentStatus: { type: String, enum: ["pending", "paid"] },
+    paymentStatus: { type: String, enum: ["pending", "paid", "failed"] },
     paymentMethod: String,
     razorpayOrderId: { type: String, unique: true, sparse: true },
     razorpayPaymentId: { type: String, unique: true, sparse: true },
