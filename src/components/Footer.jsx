@@ -17,7 +17,7 @@ function Footer() {
         </section>
         <section>
           <h3>Explore</h3>
-          <NavLink to="/">Home</NavLink>
+          <NavLink to="/Home">Home</NavLink>
           <NavLink to="/products">Shop all</NavLink>
           <NavLink to="/about">About us</NavLink>
           <NavLink to="/contact">Contact</NavLink>
